@@ -35,7 +35,7 @@ body{min-width:280px}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>设备检测</h1><p>Device Detector V5.1</p></div>
+<div class="header"><h1>设备检测</h1><p>Device Detector V5.2</p></div>
 
 <div class="hero">
 <div class="icon" id="icon">📱</div>
@@ -148,37 +148,106 @@ iphone6plus:["iPhone 6 Plus","Apple A8","1 GB","5.5 英寸，1920 × 1080","2014
 iphone6splus:["iPhone 6s Plus","Apple A9","2 GB","5.5 英寸，1920 × 1080","2015","iOS 9","iOS 15.8.x"]
 };
 
-function identify(ipad,iphone,ver){
+function safariVersion(s){
+ var m=s.match(/Version\/([0-9.]+)/i);
+ if(m)return m[1];
+ m=s.match(/(?:CriOS|FxiOS|EdgiOS)\/([0-9.]+)/i);
+ return m?m[1]:"未知";
+}
+
+function majorVersion(v){
+ var n=parseInt(v,10);
+ return isNaN(n)?-1:n;
+}
+
+function identify(ipad,iphone,ver,safari){
  var w=Math.min(screen.width,screen.height);
  var h=Math.max(screen.width,screen.height);
  var d=window.devicePixelRatio||1;
- var major=parseInt(ver.split(".")[0],10);
+ var osMajor=majorVersion(ver);
+ var browserMajor=majorVersion(safari);
  var r={model:"无法确定",confidence:"低",reason:"特征不足",key:null};
 
+ /*
+  * 重要：
+  * iOS Safari 的 screen.width/height 是 CSS 屏幕尺寸，
+  * physical width = CSS width × DPR。
+  * 因此这里同时使用 CSS 尺寸、DPR、iOS 主版本、
+  * Safari 主版本进行推断。
+  */
+
  if(ipad){
-  if(w===768&&h===1024&&d<=1.1){
-   if(!isNaN(major)&&major<=9){r.model="iPad 2";r.confidence="较高";r.reason="768 × 1024 + DPR 约 1 + iOS 版本特征";r.key="ipad2";}
-   else{r.model="iPad 2 / iPad mini";r.confidence="中";r.reason="1024 × 768 + DPR 约 1";}
-  }else if(w===768&&h===1024&&d>=1.8){
-   r.model="iPad 3 / iPad 4";r.confidence="中";r.reason="768 × 1024 + Retina DPR";
-  }else if(w===810&&h===1080){r.model="10.2 英寸 iPad";r.confidence="较高";r.reason="810 × 1080";}
-  else if(w===834&&h===1112){r.model="10.5 英寸 iPad";r.confidence="较高";r.reason="834 × 1112";}
-  else if(w===834&&h===1194){r.model="11 英寸 iPad";r.confidence="较高";r.reason="834 × 1194";}
-  else if(w===1024&&h===1366){r.model="12.9 英寸 iPad Pro";r.confidence="较高";r.reason="1024 × 1366";}
+  if(w===768&&h===1024){
+   if(d<=1.1){
+    if(osMajor>=4&&osMajor<=9){
+     if(osMajor<=5){
+      r.model="iPad 2";r.confidence="较高";r.reason="1024 × 768 CSS + DPR 1 + iOS "+ver+" + Safari "+safari;r.key="ipad2";
+     }else{
+      r.model="iPad 2 / iPad mini";r.confidence="中";r.reason="1024 × 768 CSS + DPR 1 + iOS "+ver+" + Safari "+safari;
+     }
+    }else{
+     r.model="iPad 2 / iPad mini";r.confidence="中";r.reason="1024 × 768 CSS + DPR 1";
+    }
+   }else{
+    if(osMajor>=5&&osMajor<=10){
+     r.model="iPad 3 / iPad 4";r.confidence="中";r.reason="1024 × 768 CSS + Retina DPR + iOS "+ver+" + Safari "+safari;
+    }else{
+     r.model="9.7 英寸 Retina iPad";r.confidence="中";r.reason="1024 × 768 CSS + Retina DPR";
+    }
+   }
+  }else if(w===768&&h===1004){
+   r.model="iPad（非全屏网页视口）";r.confidence="低";r.reason="检测到浏览器可视区域而非完整屏幕尺寸";
+  }else if(w===768&&h===1024&&d===1){
+   r.model="iPad 2";r.confidence="较高";r.reason="1024 × 768 CSS + DPR 1";
+   r.key="ipad2";
+  }else if(w===810&&h===1080){
+   r.model="10.2 英寸 iPad";r.confidence="较高";r.reason="810 × 1080 CSS + iPadOS";
+  }else if(w===834&&h===1112){
+   r.model="10.5 英寸 iPad";r.confidence="较高";r.reason="834 × 1112 CSS + iPadOS";
+  }else if(w===834&&h===1194){
+   r.model="11 英寸 iPad";r.confidence="较高";r.reason="834 × 1194 CSS + iPadOS";
+  }else if(w===1024&&h===1366){
+   r.model="12.9 英寸 iPad Pro";r.confidence="较高";r.reason="1024 × 1366 CSS + iPadOS";
+  }else{
+   r.model="iPad";r.confidence="中";r.reason=w+" × "+h+" CSS + DPR "+d+" + iOS "+ver+" + Safari "+safari;
+  }
  }else if(iphone){
-  if(w===320&&h===480){r.model="iPhone 4 / 4S";r.confidence="中";r.reason="320 × 480";}
-  else if(w===320&&h===568){r.model="iPhone 5 / 5c / 5s";r.confidence="中";r.reason="320 × 568";}
-  else if(w===375&&h===667){
-   if(!isNaN(major)&&major>=9){r.model="iPhone 6 / 6s";r.confidence="中";r.reason="375 × 667 + iOS 版本";}
-   else{r.model="iPhone 6";r.confidence="中";r.reason="375 × 667";}
+  if(w===320&&h===480){
+   if(osMajor>=5&&osMajor<=9){
+    r.model="iPhone 4 / 4S";r.confidence="中";r.reason="320 × 480 CSS + iOS "+ver+" + Safari "+safari;
+    if(osMajor<=4)r.key="iphone4";
+    else if(osMajor===5)r.key="iphone4s";
+   }else{
+    r.model="iPhone 4 / 4S";r.confidence="中";r.reason="320 × 480 CSS + DPR "+d;
+   }
+  }else if(w===320&&h===568){
+   if(osMajor>=7&&osMajor<=12){
+    r.model="iPhone 5 / 5c / 5s";r.confidence="中";r.reason="320 × 568 CSS + iOS "+ver+" + Safari "+safari;
+    if(osMajor===6)r.key="iphone5";
+    if(osMajor>=7)r.key="iphone5s";
+   }else{
+    r.model="4 英寸 iPhone";r.confidence="中";r.reason="320 × 568 CSS + DPR "+d;
+   }
+  }else if(w===375&&h===667){
+   if(osMajor>=9){
+    r.model="iPhone 6 / 6s";r.confidence="中";r.reason="375 × 667 CSS + iOS "+ver+" + Safari "+safari;
+    if(osMajor>=9)r.key="iphone6s";
+   }else{
+    r.model="iPhone 6";r.confidence="中";r.reason="375 × 667 CSS";r.key="iphone6";
+   }
   }else if(w===414&&h===736){
-   r.model="iPhone 6 Plus / 6s Plus";r.confidence="中";r.reason="414 × 736";
-  }else if(w===375&&h===812){r.model="全面屏 iPhone";r.confidence="较高";r.reason="375 × 812";}
-  else if(w===414&&h===896){r.model="6.1 英寸全面屏 iPhone";r.confidence="较高";r.reason="414 × 896";}
+   r.model="iPhone 6 Plus / 6s Plus";r.confidence="中";r.reason="414 × 736 CSS + iOS "+ver+" + Safari "+safari;
+   if(osMajor>=9)r.key="iphone6splus";else r.key="iphone6plus";
+  }else if(w===375&&h===812){
+   r.model="全面屏 iPhone（375 × 812）";r.confidence="较高";r.reason="375 × 812 CSS + iOS "+ver+" + Safari "+safari;
+  }else if(w===414&&h===896){
+   r.model="6.1 英寸全面屏 iPhone";r.confidence="较高";r.reason="414 × 896 CSS + iOS "+ver+" + Safari "+safari;
+  }else{
+   r.model="iPhone";r.confidence="中";r.reason=w+" × "+h+" CSS + DPR "+d+" + iOS "+ver+" + Safari "+safari;
+  }
  }
  return r;
 }
-
 function showDB(key){
  var a=db[key],box=document.getElementById("appleDatabase");
  if(!a||!box)return;
@@ -201,16 +270,20 @@ function detect(){
  else if(/Linux/i.test(s)){os="Linux";device="Linux PC";type="电脑";icon="Linux";}
 
  setText("icon",icon);
+ if(icon===""){var ie=document.getElementById("icon");if(ie){ie.style.fontFamily="Arial, Helvetica, sans-serif";ie.style.fontSize="72px";ie.style.lineHeight="80px";}}
  setText("system",os);setText("device",device);setText("badge","✓ 检测完成");
  setText("os",os);setText("version",ver);setText("type",type);setText("browser",browserName(s));
 
- var id=identify(isIPad,isIPhone,ver);
+ var safari= safariVersion(s);
+ var id=identify(isIPad,isIPhone,ver,safari);
  setText("model",id.model);setText("confidence",id.confidence);setText("reason",id.reason);
  var ce=document.getElementById("confidence");if(ce){ce.className="value "+(id.confidence==="较高"?"high":id.confidence==="中"?"medium":"low");}
  if(id.key)showDB(id.key);else hideDB();
 
- var res=screen.width+" × "+screen.height+" px";
- setText("resolution",res);setText("dpr",window.devicePixelRatio||1);
+ var dpr=window.devicePixelRatio||1;
+ var res=screen.width+" × "+screen.height+" CSS px";
+ var physical=Math.round(screen.width*dpr)+" × "+Math.round(screen.height*dpr)+" physical px";
+ setText("resolution",res+"（物理约 "+physical+"）");setText("dpr",dpr);
  setText("touch",navigator.maxTouchPoints||0);
  setText("orientation",window.innerWidth>window.innerHeight?"横屏":"竖屏");
  setText("platform",p||"未知");
@@ -218,13 +291,13 @@ function detect(){
  setText("cookie",navigator.cookieEnabled?"已启用":"已禁用");
  setText("ua",s);
 
- lastResult={device:device,os:os,version:ver,model:id.model,confidence:id.confidence,resolution:res,dpr:window.devicePixelRatio||1,browser:browserName(s)};
+ lastResult={device:device,os:os,version:ver,model:id.model,confidence:id.confidence,resolution:res,dpr:window.devicePixelRatio||1,browser:browserName(s),safari:safari};
 }
 
 function share(){
  var r=lastResult;
  if(!r){alert("检测尚未完成。");return;}
- var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.1";
+ var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.2";
  if(navigator.share){navigator.share({title:"设备检测",text:t});return;}
  var ta=document.createElement("textarea");ta.value=t;ta.style.position="absolute";ta.style.left="-9999px";
  document.body.appendChild(ta);ta.focus();ta.select();
