@@ -75,7 +75,7 @@ body{min-width:280px}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>设备检测</h1><p>Device Detector V5.4</p></div>
+<div class="header"><h1>设备检测</h1><p>Device Detector V5.5</p></div>
 
 <div class="hero">
 <div class="icon" id="icon">📱</div>
@@ -172,8 +172,12 @@ function iosVersion(s){
 function androidVersion(s){
  var m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
  if(m)return m[1];
- m=s.match(/Android[^;)]*;[^;)]*?([0-9]+(?:\.[0-9]+){1,2})/i);
- return m?m[1]:"未知";
+
+ /* 少数 WebView/厂商 UA */
+ m=s.match(/\bAndroid\s*([0-9]+)\b/i);
+ if(m)return m[1];
+
+ return "未知";
 }
 function browserName(s){
  var m;
@@ -214,15 +218,34 @@ function majorVersion(v){
 }
 
 function androidInfo(s){
- var brand="未知",model="未知",build="未知";
+ var brand="未知",model="未知",build="未知",code="未知";
  var m;
- m=s.match(/;\s*([^;()]+?)\s+Build\/([^) ;]+)/i);
+
+ /* Android 传统 UA:
+    Mozilla/5.0 (Linux; Android 12; M2007J22G Build/SKQ1...)
+    或 Android 12; M2007J22G
+ */
+ m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
+
+ /* Build 标识 */
+ m=s.match(/\bBuild\/([A-Za-z0-9._-]+)/i);
+ if(m)build=m[1];
+
+ /* Build/ 前面的设备代号 */
+ m=s.match(/;\s*([^;()]+?)\s+Build\//i);
  if(m){
-  model=m[1].replace(/^\s+|\s+$/g,"");
-  build=m[2];
+  code=m[1].replace(/^\s+|\s+$/g,"");
  }
+
+ /* 一些浏览器会把型号写成括号里的内容 */
+ if(code==="未知"){
+  m=s.match(/Android[^;)]*;\s*([^;)]+?)(?:\s+Build\/|;|\))/i);
+  if(m)code=m[1].replace(/^\s+|\s+$/g,"");
+ }
+
+ /* 品牌 */
  if(/Redmi/i.test(s))brand="Redmi";
- else if(/Xiaomi|MiuiBrowser|MIUI/i.test(s))brand="Xiaomi";
+ else if(/Xiaomi|MIUI|MiuiBrowser/i.test(s))brand="Xiaomi";
  else if(/HUAWEI|Huawei/i.test(s))brand="Huawei";
  else if(/HONOR|Honor/i.test(s))brand="HONOR";
  else if(/OPPO/i.test(s))brand="OPPO";
@@ -236,13 +259,64 @@ function androidInfo(s){
  else if(/ASUS/i.test(s))brand="ASUS";
  else if(/Nokia/i.test(s))brand="Nokia";
  else if(/Sony/i.test(s))brand="Sony";
- if(model==="未知"){
-  var p=s.match(/;\s*([^;()]+?)(?:\s+Build\/|\s*Build\/)/i);
-  if(p)model=p[1].replace(/^\s+|\s+$/g,"");
- }
- return {brand:brand,model:model,build:build};
-}
+ else if(/TECNO/i.test(s))brand="TECNO";
+ else if(/Infinix/i.test(s))brand="Infinix";
 
+ /* 常见机型代码数据库 */
+ var map={
+  "M2007J22G":"Redmi Note 9 4G",
+  "M2007J22C":"Redmi Note 9 4G",
+  "M2007J22I":"Redmi Note 9 4G",
+  "M2007J20CG":"Redmi Note 9 Pro",
+  "M2007J3SG":"Xiaomi Mi 10T Pro",
+  "M2007J3SY":"Xiaomi Mi 10T Pro",
+  "M2101K7AG":"Redmi Note 10",
+  "M2101K7BG":"Redmi Note 10",
+  "M2101K6G":"Redmi Note 10 Pro",
+  "M2101K6I":"Redmi Note 10 Pro",
+  "2201116SG":"Redmi Note 11",
+  "2201117TG":"Redmi Note 11",
+  "2201117TY":"Redmi Note 11",
+  "2201117SI":"Redmi Note 11",
+  "2201116PG":"Redmi Note 11 Pro 5G",
+  "2201116SR":"Redmi Note 11 Pro 5G",
+  "2201117SG":"Redmi Note 11S",
+  "22041219PG":"Redmi Note 11 Pro+ 5G",
+  "22041219NY":"Redmi Note 11 Pro+ 5G",
+  "2201117TL":"Redmi Note 11 Pro 5G",
+  "SM-G991B":"Samsung Galaxy S21",
+  "SM-G991U":"Samsung Galaxy S21",
+  "SM-G996B":"Samsung Galaxy S21+",
+  "SM-G998B":"Samsung Galaxy S21 Ultra",
+  "SM-G973F":"Samsung Galaxy S10",
+  "SM-G975F":"Samsung Galaxy S10+",
+  "SM-G980F":"Samsung Galaxy S20",
+  "SM-G981B":"Samsung Galaxy S20 5G",
+  "SM-G986B":"Samsung Galaxy S20+ 5G",
+  "SM-G988B":"Samsung Galaxy S20 Ultra",
+  "Pixel 6":"Google Pixel 6",
+  "Pixel 6 Pro":"Google Pixel 6 Pro",
+  "Pixel 7":"Google Pixel 7",
+  "Pixel 7 Pro":"Google Pixel 7 Pro"
+ };
+
+ var mapped=map[code];
+
+ /* Samsung 型号有时只出现在 UA 中 */
+ if(!mapped){
+  var sm=s.match(/\bSM-[A-Z0-9-]+\b/i);
+  if(sm)mapped=map[sm[0].toUpperCase()];
+ }
+
+ model=mapped||code;
+
+ return {
+  brand:brand,
+  model:model,
+  code:code,
+  build:build
+ };
+}
 function identify(ipad,iphone,ver,safari){
  var w=Math.min(screen.width,screen.height);
  var h=Math.max(screen.width,screen.height);
@@ -340,6 +414,32 @@ function showDB(key){
 }
 function hideDB(){var b=document.getElementById("appleDatabase");if(b)b.style.display="none";}
 
+function enhanceAndroidFromUAData(){
+ if(!navigator.userAgentData||!navigator.userAgentData.getHighEntropyValues)return;
+ try{
+  navigator.userAgentData.getHighEntropyValues(["model","platformVersion","fullVersionList"]).then(function(x){
+   var model=x.model||"";
+   var pv=x.platformVersion||"";
+   if(!model&&!pv)return;
+   var am=androidInfo(ua());
+   if(model)am.model=model;
+   if(!am.brand||am.brand==="未知"){
+    var bv=navigator.userAgentData.brands||navigator.userAgentData.uaList||[];
+    var i;
+    for(i=0;i<bv.length;i++){
+     if(/Chrome|Chromium|Android/i.test(bv[i].brand))continue;
+    }
+   }
+   if(pv)setText("androidVersion",pv);
+   if(model){
+    setText("androidModel",model);
+    setText("model",model);
+    setText("confidence","较高");
+   }
+  },function(){});
+ }catch(e){}
+}
+
 function detect(){
  var s=ua(),p=navigator.platform||"",isIPad=/iPad/i.test(s)||(p==="MacIntel"&&(navigator.maxTouchPoints||0)>1);
  var isIPhone=/iPhone/i.test(s),isIPod=/iPod/i.test(s),isAndroid=/Android/i.test(s);
@@ -371,7 +471,7 @@ function detect(){
  setText("androidModel",ai.model);
  setText("androidVersion",am);
  setText("androidBrowser",browserName(s));
- setText("androidBuild",ai.build);
+ setText("androidBuild",ai.build+(ai.code!=="未知"?" / 型号代码 "+ai.code:""));
 }else{
  var ab2=document.getElementById("androidDatabase");
  if(ab2)ab2.style.display="none";
@@ -392,12 +492,13 @@ function detect(){
  setText("ua",s);
 
  lastResult={device:device,os:os,version:ver,model:id.model,confidence:id.confidence,resolution:res,dpr:window.devicePixelRatio||1,browser:browserName(s),safari:safari,androidVersion:isAndroid?ver:""};
+ if(isAndroid)enhanceAndroidFromUAData();
 }
 
 function share(){
  var r=lastResult;
  if(!r){alert("检测尚未完成。");return;}
- var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.4";
+ var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.5";
  if(navigator.share){navigator.share({title:"设备检测",text:t});return;}
  var ta=document.createElement("textarea");ta.value=t;ta.style.position="absolute";ta.style.left="-9999px";
  document.body.appendChild(ta);ta.focus();ta.select();
