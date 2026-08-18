@@ -75,7 +75,7 @@ body{min-width:280px}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>设备检测</h1><p>Device Detector V5.5</p></div>
+<div class="header"><h1>设备检测</h1><p>Device Detector V5.8</p></div>
 
 <div class="hero">
 <div class="icon" id="icon">📱</div>
@@ -108,6 +108,8 @@ body{min-width:280px}
 <div class="row"><span class="label">Android 版本</span><span class="value" id="androidVersion">—</span></div>
 <div class="row"><span class="label">浏览器版本</span><span class="value" id="androidBrowser">—</span></div>
 <div class="row"><span class="label">Build 标识</span><span class="value" id="androidBuild">—</span></div>
+<div class="row"><span class="label">型号获取能力</span><span class="value" id="androidCapability">—</span></div>
+<div class="row"><span class="label">系统版本来源</span><span class="value" id="androidVersionSource">—</span></div>
 </div>
 </div>
 
@@ -181,42 +183,23 @@ function androidVersion(s){
 }
 function browserName(s){
  var m;
+ m=s.match(/MicroMessenger\/([0-9.]+)/i);
+ if(m)return"微信 "+m[1]+"（内置 WebView）";
+ m=s.match(/\bQQ\/([0-9.]+)/i);
+ if(m)return"QQ "+m[1]+"（内置 WebView）";
+ m=s.match(/QQBrowser\/([0-9.]+)/i);
+ if(m)return"QQ浏览器 "+m[1];
  m=s.match(/CriOS\/([0-9.]+)/i);if(m)return"Chrome "+m[1];
  m=s.match(/FxiOS\/([0-9.]+)/i);if(m)return"Firefox "+m[1];
  m=s.match(/EdgiOS\/([0-9.]+)/i);if(m)return"Edge "+m[1];
  m=s.match(/Chrome\/([0-9.]+)/i);if(m)return"Chrome "+m[1];
  m=s.match(/Firefox\/([0-9.]+)/i);if(m)return"Firefox "+m[1];
+ m=s.match(/Edg\/([0-9.]+)/i);if(m)return"Edge "+m[1];
  m=s.match(/Version\/([0-9.]+).*Safari/i);if(m)return"Safari "+m[1];
+ if(/WKWebView/i.test(s)||(/AppleWebKit\/[0-9.]+/i.test(s)&&/Mobile\/[0-9A-Z]+/i.test(s)&&!/Safari/i.test(s)))
+  return"WKWebView";
  return"未知浏览器";
 }
-
-var db={
-ipad2:["iPad 2","Apple A5","512 MB","9.7 英寸，1024 × 768","2011","iOS 4.3","iOS 9.3.6"],
-ipad3:["iPad（第 3 代）","Apple A5X","1 GB","9.7 英寸 Retina，2048 × 1536","2012","iOS 5.1","iOS 9.3.6"],
-ipad4:["iPad（第 4 代）","Apple A6X","1 GB","9.7 英寸 Retina，2048 × 1536","2012","iOS 6.0","iOS 10.3.4"],
-ipadmini:["iPad mini（第 1 代）","Apple A5","512 MB","7.9 英寸，1024 × 768","2012","iOS 6.0","iOS 9.3.6"],
-iphone4:["iPhone 4","Apple A4","512 MB","3.5 英寸，960 × 640","2010","iOS 4","iOS 7.1.2"],
-iphone4s:["iPhone 4S","Apple A5","512 MB","3.5 英寸，960 × 640","2011","iOS 5","iOS 9.3.6"],
-iphone5:["iPhone 5","Apple A6","1 GB","4 英寸，1136 × 640","2012","iOS 6","iOS 10.3.4"],
-iphone5s:["iPhone 5s","Apple A7","1 GB","4 英寸，1136 × 640","2013","iOS 7","iOS 12.5.x"],
-iphone6:["iPhone 6","Apple A8","1 GB","4.7 英寸，1334 × 750","2014","iOS 8","iOS 12.5.x"],
-iphone6s:["iPhone 6s","Apple A9","2 GB","4.7 英寸，1334 × 750","2015","iOS 9","iOS 15.8.x"],
-iphone6plus:["iPhone 6 Plus","Apple A8","1 GB","5.5 英寸，1920 × 1080","2014","iOS 8","iOS 12.5.x"],
-iphone6splus:["iPhone 6s Plus","Apple A9","2 GB","5.5 英寸，1920 × 1080","2015","iOS 9","iOS 15.8.x"]
-};
-
-function safariVersion(s){
- var m=s.match(/Version\/([0-9.]+)/i);
- if(m)return m[1];
- m=s.match(/(?:CriOS|FxiOS|EdgiOS)\/([0-9.]+)/i);
- return m?m[1]:"未知";
-}
-
-function majorVersion(v){
- var n=parseInt(v,10);
- return isNaN(n)?-1:n;
-}
-
 function androidInfo(s){
  var brand="未知",model="未知",build="未知",code="未知";
  var m;
@@ -264,6 +247,10 @@ function androidInfo(s){
 
  /* 常见机型代码数据库 */
  var map={
+  "M2010J19SC":"Redmi Note 9 4G",
+  "M2010J19SI":"Redmi Note 9 4G",
+  "M2010J19SG":"Redmi Note 9 4G",
+  "M2010J19SI":"Redmi Note 9 4G",
   "M2007J22G":"Redmi Note 9 4G",
   "M2007J22C":"Redmi Note 9 4G",
   "M2007J22I":"Redmi Note 9 4G",
@@ -317,6 +304,11 @@ function androidInfo(s){
   build:build
  };
 }
+function appleDeviceInfo(s){
+ var m=s.match(/Device\/Apple\(([^)]+)\)/i);
+ return m?m[1]:"";
+}
+
 function identify(ipad,iphone,ver,safari){
  var w=Math.min(screen.width,screen.height);
  var h=Math.max(screen.width,screen.height);
@@ -417,29 +409,30 @@ function hideDB(){var b=document.getElementById("appleDatabase");if(b)b.style.di
 function enhanceAndroidFromUAData(){
  if(!navigator.userAgentData||!navigator.userAgentData.getHighEntropyValues)return;
  try{
-  navigator.userAgentData.getHighEntropyValues(["model","platformVersion","fullVersionList"]).then(function(x){
+  navigator.userAgentData.getHighEntropyValues(["model","platformVersion"]).then(function(x){
    var model=x.model||"";
    var pv=x.platformVersion||"";
-   if(!model&&!pv)return;
-   var am=androidInfo(ua());
-   if(model)am.model=model;
-   if(!am.brand||am.brand==="未知"){
-    var bv=navigator.userAgentData.brands||navigator.userAgentData.uaList||[];
-    var i;
-    for(i=0;i<bv.length;i++){
-     if(/Chrome|Chromium|Android/i.test(bv[i].brand))continue;
-    }
+   var us=ua();
+   var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(us);
+
+   /* Chrome UA Reduction: Android x; K 中的版本可能是旧/冻结值，
+      platformVersion 是更可靠的实际 Android 版本。 */
+   if(reduced&&pv){
+    setText("version", "Android "+pv);
+    setText("androidVersion", pv);
+    setText("androidVersionSource","User-Agent Client Hints platformVersion");
+    if(lastResult)lastResult.version=pv;
    }
-   if(pv)setText("androidVersion",pv);
+
    if(model){
     setText("androidModel",model);
     setText("model",model);
     setText("confidence","较高");
+    if(lastResult)lastResult.model=model;
    }
   },function(){});
  }catch(e){}
 }
-
 function detect(){
  var s=ua(),p=navigator.platform||"",isIPad=/iPad/i.test(s)||(p==="MacIntel"&&(navigator.maxTouchPoints||0)>1);
  var isIPhone=/iPhone/i.test(s),isIPod=/iPod/i.test(s),isAndroid=/Android/i.test(s);
@@ -452,27 +445,33 @@ function detect(){
  else if(/Mac OS X/i.test(s)){os="macOS";device="Mac";type="电脑";icon="";}
  else if(/Linux/i.test(s)){os="Linux";device="Linux PC";type="电脑";icon="Linux";}
 
- if(isRobot){var iconBox=document.getElementById("icon");if(iconBox){iconBox.innerHTML="<span class=\"robot\"><span></span></span>";}}
+ if(isRobot){var iconBox=document.getElementById("icon");if(iconBox){iconBox.innerHTML="🤖️";iconBox.style.fontFamily="Arial, Helvetica, sans-serif";iconBox.style.fontSize="68px";}}
  else{setText("icon",icon);}
  if(icon===""){var ie=document.getElementById("icon");if(ie){ie.style.fontFamily="Arial, Helvetica, sans-serif";ie.style.fontSize="72px";ie.style.lineHeight="80px";}}
  setText("system",os);setText("device",device);setText("badge","✓ 检测完成");
  setText("os",os);setText("version",ver);setText("type",type);setText("browser",browserName(s));
 
  var safari= safariVersion(s);
+ var appleDevice=appleDeviceInfo(s);
  var id=identify(isIPad,isIPhone,ver,safari);
+ if((isIPad||isIPhone)&&appleDevice){id.model=appleDevice;id.confidence="较高";id.reason="Apple Device 标识："+appleDevice;}
  if(isAndroid){
  var ai=androidInfo(s),am=androidVersion(s);
- id.model=ai.model!=="未知"?ai.model:(ai.brand!=="未知"?ai.brand+" Android 设备":"Android 设备");
- id.confidence=(am!=="未知"&&ai.model!=="未知")?"较高":(am!=="未知"?"中":"低");
- id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(ai.model!=="未知"?" + Build 型号 "+ai.model:"");
+ var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(s);
+ var hasRealModel=(ai.model!=="未知" && ai.code!=="未知");
+ id.model=hasRealModel?ai.model:"Android 设备";
+ id.confidence=hasRealModel&&am!=="未知"?"较高":(am!=="未知"?"中":"低");
+ id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(hasRealModel?" + 型号代码 "+ai.code:(reduced?" + UA 已精简，硬件型号被隐藏":" + 未提供硬件型号"));
  var ab=document.getElementById("androidDatabase");
  if(ab)ab.style.display="block";
  setText("androidBrand",ai.brand);
- setText("androidModel",ai.model);
+ setText("androidModel",hasRealModel?ai.model:"无法从当前 UA 确定");
  setText("androidVersion",am);
  setText("androidBrowser",browserName(s));
  setText("androidBuild",ai.build+(ai.code!=="未知"?" / 型号代码 "+ai.code:""));
-}else{
+ setText("androidCapability",hasRealModel?"已提供真实型号代码":(reduced?"浏览器已精简 UA，型号不可见":"当前 UA 未提供型号代码"));
+ setText("androidVersionSource",reduced?"User-Agent：Android "+am+"（Chrome UA Reduction）":"User-Agent：Android "+am);
+}}else{
  var ab2=document.getElementById("androidDatabase");
  if(ab2)ab2.style.display="none";
 }
@@ -498,7 +497,7 @@ function detect(){
 function share(){
  var r=lastResult;
  if(!r){alert("检测尚未完成。");return;}
- var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.5";
+ var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.8";
  if(navigator.share){navigator.share({title:"设备检测",text:t});return;}
  var ta=document.createElement("textarea");ta.value=t;ta.style.position="absolute";ta.style.left="-9999px";
  document.body.appendChild(ta);ta.focus();ta.select();
