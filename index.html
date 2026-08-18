@@ -1,262 +1,954 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
       content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+               initial-scale=1,
+               viewport-fit=cover">
 
-<title>设备检测</title>
+<title>设备检测 | Device Detector</title>
+
 
 <style>
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+
+/* =========================
+   颜色
+   ========================= */
+
+:root {
+
+    --bg: #f2f2f7;
+
+    --card: rgba(255,255,255,.88);
+
+    --text: #1c1c1e;
+
+    --secondary: #6e6e73;
+
+    --line: rgba(0,0,0,.08);
+
+    --blue: #007aff;
+
+    --green: #34c759;
+
+    --orange: #ff9500;
+
+    --red: #ff3b30;
+
 }
 
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+
+        --bg: #000;
+
+        --card: rgba(28,28,30,.90);
+
+        --text: #f5f5f7;
+
+        --secondary: #98989f;
+
+        --line: rgba(255,255,255,.10);
+
+    }
+
+}
+
+
+/* =========================
+   基础
+   ========================= */
+
+* {
+
+    box-sizing: border-box;
+
+    -webkit-tap-highlight-color: transparent;
+
+}
+
+
+html {
+
+    background: var(--bg);
+
+}
+
+
 body {
+
     margin: 0;
-    padding: 0;
-    background: #f2f2f7;
-    color: #1c1c1e;
+
+    min-height: 100vh;
+
+    background:
+
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(0,122,255,.18),
+            transparent 42%
+        ),
+
+        var(--bg);
+
+    color: var(--text);
+
     font-family:
+
         -apple-system,
         BlinkMacSystemFont,
+        "SF Pro Display",
         "Segoe UI",
         Roboto,
         Helvetica,
         Arial,
         sans-serif;
+
 }
+
+
+/* =========================
+   主容器
+   ========================= */
 
 .container {
-    width: calc(100% - 30px);
-    max-width: 720px;
-    margin: 25px auto 40px;
+
+    width: min(
+        760px,
+        calc(100% - 28px)
+    );
+
+    margin: auto;
+
+    padding:
+
+        max(
+            25px,
+            env(safe-area-inset-top)
+        )
+
+        0
+
+        max(
+            35px,
+            env(safe-area-inset-bottom)
+        );
+
 }
+
+
+/* =========================
+   标题
+   ========================= */
 
 .header {
+
     text-align: center;
-    padding: 20px 0;
+
+    padding: 20px 0 22px;
+
 }
+
 
 .header h1 {
+
     margin: 0;
-    font-size: 30px;
+
+    font-size: 32px;
+
+    letter-spacing: -.8px;
+
 }
+
 
 .header p {
-    margin: 8px 0 0;
-    color: #8e8e93;
-    font-size: 15px;
+
+    margin: 7px 0 0;
+
+    color: var(--secondary);
+
+    font-size: 14px;
+
 }
 
-.result {
-    background: white;
-    border-radius: 24px;
-    padding: 30px 20px;
+
+/* =========================
+   主结果
+   ========================= */
+
+.hero {
+
+    position: relative;
+
+    overflow: hidden;
+
+    background: var(--card);
+
+    backdrop-filter: blur(20px);
+
+    -webkit-backdrop-filter: blur(20px);
+
+    border-radius: 30px;
+
+    padding: 42px 20px 35px;
+
     text-align: center;
-    box-shadow: 0 5px 20px rgba(0,0,0,.07);
-    margin-bottom: 16px;
+
+    box-shadow:
+
+        0 15px 45px
+        rgba(0,0,0,.10);
+
 }
+
+
+.hero::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+
+    height: 220px;
+
+    border-radius: 50%;
+
+    background:
+
+        rgba(0,122,255,.10);
+
+    top: -130px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+}
+
 
 .icon {
-    font-size: 64px;
-    line-height: 1.2;
+
+    position: relative;
+
+    font-size: 72px;
+
+    line-height: 1;
+
+    margin-bottom: 18px;
+
 }
+
 
 .system {
-    margin-top: 10px;
-    font-size: 29px;
-    font-weight: 700;
+
+    font-size: 34px;
+
+    font-weight: 750;
+
+    letter-spacing: -.8px;
+
 }
+
 
 .device {
+
     margin-top: 7px;
-    font-size: 17px;
-    color: #6e6e73;
+
+    font-size: 18px;
+
+    color: var(--secondary);
+
 }
 
-.status {
-    margin-top: 12px;
+
+.badge {
+
+    display: inline-block;
+
+    margin-top: 16px;
+
+    padding: 7px 13px;
+
+    border-radius: 999px;
+
+    background:
+
+        rgba(52,199,89,.12);
+
+    color: var(--green);
+
     font-size: 13px;
-    color: #34c759;
+
+    font-weight: 600;
+
 }
+
+
+/* =========================
+   卡片
+   ========================= */
 
 .card {
-    background: white;
-    border-radius: 20px;
+
+    margin-top: 16px;
+
+    background: var(--card);
+
+    backdrop-filter: blur(20px);
+
+    -webkit-backdrop-filter: blur(20px);
+
+    border-radius: 22px;
+
     padding: 20px;
-    margin-bottom: 16px;
+
+    box-shadow:
+
+        0 7px 25px
+        rgba(0,0,0,.06);
+
 }
+
 
 .card h2 {
+
+    margin: 0 0 8px;
+
     font-size: 18px;
-    margin: 0 0 10px;
+
 }
+
+
+/* =========================
+   信息行
+   ========================= */
 
 .row {
+
     display: flex;
+
     justify-content: space-between;
-    gap: 15px;
-    padding: 13px 0;
-    border-bottom: 1px solid #eee;
+
+    gap: 20px;
+
+    padding: 14px 0;
+
+    border-bottom:
+        1px solid var(--line);
+
 }
+
 
 .row:last-child {
+
     border-bottom: none;
+
 }
+
 
 .label {
-    color: #8e8e93;
+
+    color: var(--secondary);
+
+    flex-shrink: 0;
+
 }
+
 
 .value {
+
     text-align: right;
-    max-width: 65%;
+
     word-break: break-word;
+
 }
+
+
+/* =========================
+   可信度颜色
+   ========================= */
+
+.high {
+
+    color: var(--green);
+
+    font-weight: 600;
+
+}
+
+
+.medium {
+
+    color: var(--orange);
+
+    font-weight: 600;
+
+}
+
+
+.low {
+
+    color: var(--secondary);
+
+}
+
+
+/* =========================
+   User-Agent
+   ========================= */
 
 .ua {
-    background: #f2f2f7;
-    border-radius: 12px;
-    padding: 12px;
+
+    margin-top: 12px;
+
+    padding: 14px;
+
+    border-radius: 14px;
+
+    background:
+
+        rgba(120,120,128,.10);
+
+    color: var(--secondary);
+
     font-size: 12px;
-    line-height: 1.5;
+
+    line-height: 1.6;
+
     word-break: break-all;
-    color: #636366;
+
 }
+
+
+/* =========================
+   按钮
+   ========================= */
 
 button {
+
     width: 100%;
-    border: 0;
-    border-radius: 15px;
+
+    margin-top: 16px;
+
+    border: none;
+
+    border-radius: 16px;
+
     padding: 15px;
-    background: #007aff;
+
+    background: var(--blue);
+
     color: white;
+
     font-size: 17px;
+
     font-weight: 600;
+
 }
+
 
 button:active {
-    opacity: .6;
+
+    opacity: .65;
+
+    transform: scale(.99);
+
 }
+
+
+/* =========================
+   页脚
+   ========================= */
 
 .footer {
+
     text-align: center;
-    color: #8e8e93;
+
+    color: var(--secondary);
+
     font-size: 12px;
-    margin-top: 20px;
+
+    margin-top: 22px;
+
+    line-height: 1.7;
+
 }
 
-.error {
-    color: #ff3b30;
+
+/* =========================
+   手机
+   ========================= */
+
+@media (max-width: 450px) {
+
+    .system {
+
+        font-size: 29px;
+
+    }
+
+    .row {
+
+        flex-direction: column;
+
+        gap: 4px;
+
+    }
+
+    .value {
+
+        text-align: left;
+
+    }
+
 }
+
+
+/* =========================
+   桌面
+   ========================= */
+
+@media (min-width: 700px) {
+
+    .container {
+
+        padding-top: 45px;
+
+    }
+
+    .hero {
+
+        padding: 50px 30px 40px;
+
+    }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
+
+    <!-- =========================
+         标题
+         ========================= -->
+
     <div class="header">
-        <h1>设备检测</h1>
-        <p>Device Detector</p >
-    </div>
 
-    <div class="result">
+        <h1>
+            设备检测
+        </h1>
 
-        <div class="icon" id="icon">📱</div>
-
-        <div class="system" id="system">
-            检测中...
-        </div>
-
-        <div class="device" id="device">
-            请稍候
-        </div>
-
-        <div class="status" id="status">
-            正在读取设备信息
-        </div>
+        <p>
+            Device Detector
+        </p>
 
     </div>
 
+
+    <!-- =========================
+         主结果
+         ========================= -->
+
+    <div class="hero">
+
+        <div
+            class="icon"
+            id="icon">
+
+            📱
+
+        </div>
+
+
+        <div
+            class="system"
+            id="system">
+
+            检测中…
+
+        </div>
+
+
+        <div
+            class="device"
+            id="device">
+
+            正在分析设备
+
+        </div>
+
+
+        <div
+            class="badge"
+            id="badge">
+
+            正在检测
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         系统信息
+         ========================= -->
 
     <div class="card">
 
-        <h2>设备信息</h2>
+        <h2>
+            系统信息
+        </h2>
+
 
         <div class="row">
-            <span class="label">操作系统</span>
-            <span class="value" id="os">-</span>
+
+            <span class="label">
+                操作系统
+            </span>
+
+            <span
+                class="value"
+                id="os">
+
+                —
+
+            </span>
+
         </div>
 
-        <div class="row">
-            <span class="label">设备类型</span>
-            <span class="value" id="type">-</span>
-        </div>
 
         <div class="row">
-            <span class="label">系统版本</span>
-            <span class="value" id="version">-</span>
+
+            <span class="label">
+                系统版本
+            </span>
+
+            <span
+                class="value"
+                id="version">
+
+                —
+
+            </span>
+
         </div>
 
-        <div class="row">
-            <span class="label">浏览器</span>
-            <span class="value" id="browser">-</span>
-        </div>
 
         <div class="row">
-            <span class="label">屏幕</span>
-            <span class="value" id="screen">-</span>
+
+            <span class="label">
+                设备类型
+            </span>
+
+            <span
+                class="value"
+                id="type">
+
+                —
+
+            </span>
+
         </div>
 
-        <div class="row">
-            <span class="label">设备像素比</span>
-            <span class="value" id="dpr">-</span>
-        </div>
 
         <div class="row">
-            <span class="label">触摸点</span>
-            <span class="value" id="touch">-</span>
-        </div>
 
-        <div class="row">
-            <span class="label">平台</span>
-            <span class="value" id="platform">-</span>
+            <span class="label">
+                浏览器
+            </span>
+
+            <span
+                class="value"
+                id="browser">
+
+                —
+
+            </span>
+
         </div>
 
     </div>
 
+
+    <!-- =========================
+         型号识别
+         ========================= -->
 
     <div class="card">
 
-        <h2>User-Agent</h2>
+        <h2>
+            设备型号识别
+        </h2>
 
-        <div class="ua" id="ua">
-            -
+
+        <div class="row">
+
+            <span class="label">
+                识别结果
+            </span>
+
+            <span
+                class="value"
+                id="model">
+
+                正在识别…
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                可信度
+            </span>
+
+            <span
+                class="value"
+                id="confidence">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                识别依据
+            </span>
+
+            <span
+                class="value"
+                id="reason">
+
+                —
+
+            </span>
+
         </div>
 
     </div>
 
 
-    <button onclick="detectDevice()">
+    <!-- =========================
+         硬件
+         ========================= -->
+
+    <div class="card">
+
+        <h2>
+            硬件信息
+        </h2>
+
+
+        <div class="row">
+
+            <span class="label">
+                屏幕分辨率
+            </span>
+
+            <span
+                class="value"
+                id="resolution">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                设备像素比
+            </span>
+
+            <span
+                class="value"
+                id="dpr">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                最大触摸点
+            </span>
+
+            <span
+                class="value"
+                id="touch">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                当前方向
+            </span>
+
+            <span
+                class="value"
+                id="orientation">
+
+                —
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         浏览器
+         ========================= -->
+
+    <div class="card">
+
+        <h2>
+            浏览器环境
+        </h2>
+
+
+        <div class="row">
+
+            <span class="label">
+                Platform
+            </span>
+
+            <span
+                class="value"
+                id="platform">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                在线状态
+            </span>
+
+            <span
+                class="value"
+                id="online">
+
+                —
+
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="label">
+                Cookie
+            </span>
+
+            <span
+                class="value"
+                id="cookie">
+
+                —
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         UA
+         ========================= -->
+
+    <div class="card">
+
+        <h2>
+            User-Agent
+        </h2>
+
+
+        <div
+            class="ua"
+            id="ua">
+
+            —
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         按钮
+         ========================= -->
+
+    <button
+        onclick="detectDevice()">
+
         重新检测
+
     </button>
 
 
     <div class="footer">
-        检测在本地完成，不上传设备信息
+
+        <div>
+            检测完全在本地进行
+        </div>
+
+        <div>
+            不上传设备信息
+        </div>
+
     </div>
+
 
 </div>
 
 
 <script>
+
+/* =====================================================
+   Device Detector V3
+   ===================================================== */
 
 (function () {
 
@@ -264,169 +956,721 @@ button:active {
 
 
 /* =========================
-   安全读取 navigator
+   安全输出
    ========================= */
 
-function getUA() {
-    try {
-        return navigator.userAgent || "";
-    } catch (e) {
-        return "";
+function text(id, value) {
+
+    var element =
+        document.getElementById(id);
+
+    if (element) {
+
+        element.textContent =
+            value;
+
     }
-}
 
-
-function getPlatform() {
-    try {
-        return navigator.platform || "";
-    } catch (e) {
-        return "";
-    }
-}
-
-
-function getTouchPoints() {
-    try {
-        return Number(navigator.maxTouchPoints || 0);
-    } catch (e) {
-        return 0;
-    }
 }
 
 
 /* =========================
-   获取 iOS 版本
+   User-Agent
+   ========================= */
+
+function getUA() {
+
+    try {
+
+        return navigator.userAgent || "";
+
+    }
+
+    catch (e) {
+
+        return "";
+
+    }
+
+}
+
+
+/* =========================
+   Platform
+   ========================= */
+
+function getPlatform() {
+
+    try {
+
+        return navigator.platform || "";
+
+    }
+
+    catch (e) {
+
+        return "";
+
+    }
+
+}
+
+
+/* =========================
+   Touch
+   ========================= */
+
+function getTouchPoints() {
+
+    try {
+
+        return Number(
+            navigator.maxTouchPoints || 0
+        );
+
+    }
+
+    catch (e) {
+
+        return 0;
+
+    }
+
+}
+
+
+/* =========================
+   iOS 版本
    ========================= */
 
 function getIOSVersion(ua) {
 
-    var match = ua.match(
-        /OS (\d+)[._](\d+)(?:[._](\d+))?/i
-    );
+    var match =
+        ua.match(
+            /OS (\d+)[._](\d+)(?:[._](\d+))?/i
+        );
+
 
     if (!match) {
+
         return "未知";
+
     }
 
-    var version = match[1] + "." + match[2];
+
+    var result =
+        match[1] +
+        "." +
+        match[2];
+
 
     if (match[3]) {
-        version += "." + match[3];
+
+        result +=
+            "." +
+            match[3];
+
     }
 
-    return version;
+
+    return result;
+
 }
 
 
 /* =========================
-   获取 Android 版本
+   Android 版本
    ========================= */
 
 function getAndroidVersion(ua) {
 
-    var match = ua.match(
-        /Android[ \/]([\d.]+)/i
-    );
+    var match =
+        ua.match(
+            /Android[ \/]([\d.]+)/i
+        );
 
-    if (!match) {
-        return "未知";
-    }
 
-    return match[1];
+    return match
+        ? match[1]
+        : "未知";
+
 }
 
 
 /* =========================
-   获取浏览器
+   浏览器
    ========================= */
 
 function getBrowser(ua) {
 
-    if (/CriOS/i.test(ua)) {
-        return "Chrome";
+    var match;
+
+
+    if (
+        (match =
+            ua.match(
+                /CriOS\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Chrome " +
+               match[1];
+
     }
 
-    if (/FxiOS/i.test(ua)) {
-        return "Firefox";
+
+    if (
+        (match =
+            ua.match(
+                /FxiOS\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Firefox " +
+               match[1];
+
     }
 
-    if (/EdgiOS/i.test(ua)) {
-        return "Edge";
+
+    if (
+        (match =
+            ua.match(
+                /EdgiOS\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Edge " +
+               match[1];
+
     }
 
-    if (/OPiOS/i.test(ua)) {
-        return "Opera";
+
+    if (
+        (match =
+            ua.match(
+                /Edg\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Edge " +
+               match[1];
+
     }
 
-    if (/DuckDuckGo/i.test(ua)) {
-        return "DuckDuckGo";
+
+    if (
+        (match =
+            ua.match(
+                /OPR\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Opera " +
+               match[1];
+
     }
 
-    if (/GSA/i.test(ua)) {
-        return "Google App";
+
+    if (
+        (match =
+            ua.match(
+                /Chrome\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Chrome " +
+               match[1];
+
     }
 
-    if (/Edg\//i.test(ua)) {
-        return "Microsoft Edge";
+
+    if (
+        (match =
+            ua.match(
+                /Firefox\/([\d.]+)/i
+            ))
+    ) {
+
+        return "Firefox " +
+               match[1];
+
     }
 
-    if (/OPR\//i.test(ua)) {
-        return "Opera";
+
+    if (
+        (match =
+            ua.match(
+                /Version\/([\d.]+).*Safari/i
+            ))
+    ) {
+
+        return "Safari " +
+               match[1];
+
     }
 
-    if (/Chrome\//i.test(ua)) {
-        return "Google Chrome";
-    }
-
-    if (/Firefox\//i.test(ua)) {
-        return "Firefox";
-    }
-
-    if (/Safari\//i.test(ua)) {
-        return "Safari";
-    }
 
     return "未知浏览器";
+
 }
 
 
-/* =========================
-   主检测函数
-   ========================= */
+/* =====================================================
+   型号识别
+   ===================================================== */
 
-window.detectDevice = function () {
+function detectModel(
+    isIPad,
+    isIPhone,
+    isIPod,
+    isAndroid
+) {
 
-    try {
 
-        var ua = getUA();
-        var platform = getPlatform();
-        var touch = getTouchPoints();
+    var result = {
+
+        model: "无法确定",
+
+        confidence: "低",
+
+        reason:
+            "浏览器没有提供足够的硬件型号信息"
+
+    };
 
 
-        var os = "未知";
-        var type = "未知";
-        var version = "未知";
-        var icon = "❓";
+    var w =
+        Math.min(
+            screen.width,
+            screen.height
+        );
+
+
+    var h =
+        Math.max(
+            screen.width,
+            screen.height
+        );
+
+
+    var dpr =
+        window.devicePixelRatio || 1;
+
+
+    /* =========================
+       iPad
+       ========================= */
+
+    if (isIPad) {
 
 
         /*
-         * iPadOS 13+
+         * iPad 2
          *
-         * Safari 有时会报告：
-         *
-         * platform = MacIntel
-         *
-         * 但同时支持多点触摸。
-         *
-         * 因此：
-         *
-         * MacIntel + touch > 1
-         *
-         * 可以作为 iPadOS 的重要判断依据。
+         * 1024 × 768
+         * DPR 1
          */
+
+        if (
+            w === 768 &&
+            h === 1024 &&
+            dpr <= 1.1
+        ) {
+
+            result.model =
+                "iPad 2 / 早期 9.7 英寸 iPad";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "768 × 1024 + 1×";
+
+        }
+
+
+        /*
+         * 9.7 Retina
+         */
+
+        else if (
+            w === 768 &&
+            h === 1024 &&
+            dpr >= 1.8
+        ) {
+
+            result.model =
+                "9.7 英寸 Retina iPad";
+
+            result.confidence =
+                "中";
+
+            result.reason =
+                "768 × 1024 + 2×";
+
+        }
+
+
+        /*
+         * 10.2
+         */
+
+        else if (
+            w === 810 &&
+            h === 1080
+        ) {
+
+            result.model =
+                "10.2 英寸 iPad";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "810 × 1080";
+
+        }
+
+
+        /*
+         * 10.5
+         */
+
+        else if (
+            w === 834 &&
+            h === 1112
+        ) {
+
+            result.model =
+                "10.5 英寸 iPad";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "834 × 1112";
+
+        }
+
+
+        /*
+         * 11 英寸
+         */
+
+        else if (
+            w === 834 &&
+            h === 1194
+        ) {
+
+            result.model =
+                "11 英寸 iPad Pro";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "834 × 1194";
+
+        }
+
+
+        /*
+         * 12.9
+         */
+
+        else if (
+            w === 1024 &&
+            h === 1366
+        ) {
+
+            result.model =
+                "12.9 英寸 iPad Pro";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "1024 × 1366";
+
+        }
+
+
+        else {
+
+            result.model =
+                "iPad（具体型号未知）";
+
+            result.confidence =
+                "低";
+
+            result.reason =
+                "确认是 iPad，但无法进一步确定型号";
+
+        }
+
+    }
+
+
+    /* =========================
+       iPhone
+       ========================= */
+
+    else if (isIPhone) {
+
+
+        /*
+         * 3.5 英寸
+         *
+         * iPhone 4
+         * iPhone 4S
+         */
+
+        if (
+            w === 320 &&
+            h === 480
+        ) {
+
+            result.model =
+                "3.5 英寸 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "320 × 480";
+
+        }
+
+
+        /*
+         * 4 英寸
+         *
+         * iPhone 5
+         * 5c
+         * 5s
+         * SE
+         */
+
+        else if (
+            w === 320 &&
+            h === 568
+        ) {
+
+            result.model =
+                "4 英寸 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "320 × 568";
+
+        }
+
+
+        /*
+         * 4.7 英寸
+         *
+         * iPhone 6
+         * 6s
+         * 7
+         * 8
+         * SE 2
+         * SE 3
+         */
+
+        else if (
+            w === 375 &&
+            h === 667
+        ) {
+
+            result.model =
+                "4.7 英寸 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "375 × 667 pt";
+
+        }
+
+
+        /*
+         * 5.5 Plus
+         */
+
+        else if (
+            w === 414 &&
+            h === 736
+        ) {
+
+            result.model =
+                "5.5 英寸 iPhone Plus";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "414 × 736 pt";
+
+        }
+
+
+        /*
+         * X / XS / 11 Pro
+         */
+
+        else if (
+            w === 375 &&
+            h === 812
+        ) {
+
+            result.model =
+                "5.8 英寸全面屏 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "375 × 812 pt";
+
+        }
+
+
+        /*
+         * XR / 11
+         */
+
+        else if (
+            w === 414 &&
+            h === 896
+        ) {
+
+            result.model =
+                "6.1 英寸 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "414 × 896 pt";
+
+        }
+
+
+        /*
+         * 其他
+         */
+
+        else {
+
+            result.model =
+                "iPhone（具体型号未知）";
+
+            result.confidence =
+                "低";
+
+            result.reason =
+                "确认是 iPhone，但特征不足";
+
+        }
+
+    }
+
+
+    /* =========================
+       iPod
+       ========================= */
+
+    else if (isIPod) {
+
+        result.model =
+            "iPod touch";
+
+        result.confidence =
+            "中";
+
+        result.reason =
+            "User-Agent 明确包含 iPod";
+
+    }
+
+
+    /* =========================
+       Android
+       ========================= */
+
+    else if (isAndroid) {
+
+        result.model =
+            "Android 设备";
+
+        result.confidence =
+            "低";
+
+        result.reason =
+            "Android 浏览器通常不会可靠提供硬件型号";
+
+    }
+
+
+    return result;
+
+}
+
+
+/* =====================================================
+   主函数
+   ===================================================== */
+
+window.detectDevice =
+function () {
+
+
+    try {
+
+
+        var ua =
+            getUA();
+
+
+        var platform =
+            getPlatform();
+
+
+        var touch =
+            getTouchPoints();
+
+
+        var os =
+            "未知系统";
+
+
+        var version =
+            "未知";
+
+
+        var device =
+            "未知设备";
+
+
+        var type =
+            "未知";
+
+
+        var icon =
+            "❓";
+
+
+        /* =========================
+           判断 Apple
+           ========================= */
+
 
         var isIPad =
             /iPad/i.test(ua) ||
+
             (
                 platform === "MacIntel" &&
                 touch > 1
@@ -446,33 +1690,73 @@ window.detectDevice = function () {
 
 
         /* =========================
-           Apple
+           iPad
            ========================= */
 
         if (isIPad) {
 
-            os = "iPadOS";
-            type = "iPad";
-            version = getIOSVersion(ua);
-            icon = "🍎";
+            os =
+                "iPadOS";
+
+            version =
+                getIOSVersion(ua);
+
+            device =
+                "iPad";
+
+            type =
+                "平板电脑";
+
+            icon =
+                "🍎";
 
         }
+
+
+        /* =========================
+           iPhone
+           ========================= */
 
         else if (isIPhone) {
 
-            os = "iOS";
-            type = "iPhone";
-            version = getIOSVersion(ua);
-            icon = "🍎";
+            os =
+                "iOS";
+
+            version =
+                getIOSVersion(ua);
+
+            device =
+                "iPhone";
+
+            type =
+                "智能手机";
+
+            icon =
+                "🍎";
 
         }
 
+
+        /* =========================
+           iPod
+           ========================= */
+
         else if (isIPod) {
 
-            os = "iOS";
-            type = "iPod touch";
-            version = getIOSVersion(ua);
-            icon = "🍎";
+            os =
+                "iOS";
+
+            version =
+                getIOSVersion(ua);
+
+            device =
+                "iPod touch";
+
+            type =
+                "便携设备";
+
+            icon =
+                "🍎";
 
         }
 
@@ -483,17 +1767,37 @@ window.detectDevice = function () {
 
         else if (isAndroid) {
 
-            os = "Android";
+            os =
+                "Android";
 
-            version = getAndroidVersion(ua);
+            version =
+                getAndroidVersion(ua);
 
-            if (/Mobile/i.test(ua)) {
-                type = "Android 手机";
-            } else {
-                type = "Android 平板";
+            icon =
+                "🤖";
+
+
+            if (
+                /Mobile/i.test(ua)
+            ) {
+
+                device =
+                    "Android 手机";
+
+                type =
+                    "智能手机";
+
             }
 
-            icon = "🤖";
+            else {
+
+                device =
+                    "Android 平板";
+
+                type =
+                    "平板电脑";
+
+            }
 
         }
 
@@ -502,11 +1806,44 @@ window.detectDevice = function () {
            Windows
            ========================= */
 
-        else if (/Windows/i.test(ua)) {
+        else if (
+            /Windows/i.test(ua)
+        ) {
 
-            os = "Windows";
-            type = "Windows PC";
-            icon = "🪟";
+            os =
+                "Windows";
+
+            device =
+                "Windows PC";
+
+            type =
+                "电脑";
+
+            icon =
+                "🪟";
+
+        }
+
+
+        /* =========================
+           ChromeOS
+           ========================= */
+
+        else if (
+            /CrOS/i.test(ua)
+        ) {
+
+            os =
+                "ChromeOS";
+
+            device =
+                "Chromebook";
+
+            type =
+                "电脑";
+
+            icon =
+                "💻";
 
         }
 
@@ -516,13 +1853,20 @@ window.detectDevice = function () {
            ========================= */
 
         else if (
-            /Mac OS X/i.test(ua) ||
-            /^Mac/i.test(platform)
+            /Mac OS X/i.test(ua)
         ) {
 
-            os = "macOS";
-            type = "Mac";
-            icon = "🍎";
+            os =
+                "macOS";
+
+            device =
+                "Mac";
+
+            type =
+                "电脑";
+
+            icon =
+                "🍎";
 
         }
 
@@ -531,156 +1875,424 @@ window.detectDevice = function () {
            Linux
            ========================= */
 
-        else if (/Linux/i.test(ua)) {
+        else if (
+            /Linux/i.test(ua)
+        ) {
 
-            os = "Linux";
-            type = "Linux PC";
-            icon = "🐧";
+            os =
+                "Linux";
 
-        }
+            device =
+                "Linux PC";
 
+            type =
+                "电脑";
 
-        /* =========================
-           ChromeOS
-           ========================= */
-
-        else if (/CrOS/i.test(ua)) {
-
-            os = "ChromeOS";
-            type = "Chromebook";
-            icon = "💻";
+            icon =
+                "🐧";
 
         }
 
 
         /* =========================
-           写入页面
+           ChromeOS 二次确认
            ========================= */
 
-        document.getElementById("icon").textContent =
-            icon;
+        if (
+            /CrOS/i.test(ua)
+        ) {
 
-        document.getElementById("system").textContent =
-            os;
+            os =
+                "ChromeOS";
 
-        document.getElementById("device").textContent =
-            type;
+            device =
+                "Chromebook";
 
-        document.getElementById("status").textContent =
-            "✓ 检测完成";
+            type =
+                "电脑";
 
-        document.getElementById("os").textContent =
-            os;
+            icon =
+                "💻";
 
-        document.getElementById("type").textContent =
-            type;
+        }
 
-        document.getElementById("version").textContent =
-            version;
 
-        document.getElementById("browser").textContent =
-            getBrowser(ua);
+        /* =========================
+           型号
+           ========================= */
 
-        document.getElementById("screen").textContent =
-            window.screen.width +
+        var modelInfo =
+            detectModel(
+                isIPad,
+                isIPhone,
+                isIPod,
+                isAndroid
+            );
+
+
+        /* =========================
+           输出主结果
+           ========================= */
+
+        text(
+            "icon",
+            icon
+        );
+
+
+        text(
+            "system",
+            os
+        );
+
+
+        text(
+            "device",
+            device
+        );
+
+
+        text(
+            "badge",
+            "✓ 检测完成"
+        );
+
+
+        /* =========================
+           系统
+           ========================= */
+
+        text(
+            "os",
+            os
+        );
+
+
+        text(
+            "version",
+            version
+        );
+
+
+        text(
+            "type",
+            type
+        );
+
+
+        text(
+            "browser",
+            getBrowser(ua)
+        );
+
+
+        /* =========================
+           型号
+           ========================= */
+
+        text(
+            "model",
+            modelInfo.model
+        );
+
+
+        text(
+            "confidence",
+            modelInfo.confidence
+        );
+
+
+        text(
+            "reason",
+            modelInfo.reason
+        );
+
+
+        /* =========================
+           可信度颜色
+           ========================= */
+
+        var confidenceElement =
+            document.getElementById(
+                "confidence"
+            );
+
+
+        if (
+            confidenceElement
+        ) {
+
+            confidenceElement.className =
+                "value";
+
+
+            if (
+                modelInfo.confidence ===
+                "较高"
+            ) {
+
+                confidenceElement.className +=
+                    " high";
+
+            }
+
+            else if (
+                modelInfo.confidence ===
+                "中"
+            ) {
+
+                confidenceElement.className +=
+                    " medium";
+
+            }
+
+            else {
+
+                confidenceElement.className +=
+                    " low";
+
+            }
+
+        }
+
+
+        /* =========================
+           屏幕
+           ========================= */
+
+        text(
+            "resolution",
+
+            screen.width +
             " × " +
-            window.screen.height;
+            screen.height +
+            " px"
+        );
 
-        document.getElementById("dpr").textContent =
-            window.devicePixelRatio || 1;
 
-        document.getElementById("touch").textContent =
-            touch;
+        /* =========================
+           DPR
+           ========================= */
 
-        document.getElementById("platform").textContent =
-            platform || "未知";
+        text(
+            "dpr",
 
-        document.getElementById("ua").textContent =
-            ua || "无法读取 User-Agent";
+            window.devicePixelRatio ||
+            1
+        );
+
+
+        /* =========================
+           Touch
+           ========================= */
+
+        text(
+            "touch",
+
+            touch
+        );
+
+
+        /* =========================
+           方向
+           ========================= */
+
+        var orientation;
+
+
+        if (
+            window.innerWidth >
+            window.innerHeight
+        ) {
+
+            orientation =
+                "横屏";
+
+        }
+
+        else {
+
+            orientation =
+                "竖屏";
+
+        }
+
+
+        text(
+            "orientation",
+            orientation
+        );
+
+
+        /* =========================
+           Platform
+           ========================= */
+
+        text(
+            "platform",
+
+            platform ||
+            "未知"
+        );
+
+
+        /* =========================
+           在线
+           ========================= */
+
+        text(
+            "online",
+
+            navigator.onLine
+                ? "在线"
+                : "离线"
+        );
+
+
+        /* =========================
+           Cookie
+           ========================= */
+
+        text(
+            "cookie",
+
+            navigator.cookieEnabled
+                ? "已启用"
+                : "已禁用"
+        );
+
+
+        /* =========================
+           UA
+           ========================= */
+
+        text(
+            "ua",
+
+            ua ||
+            "无法读取 User-Agent"
+        );
 
 
     }
 
     catch (error) {
 
-        /*
-         * 即使某个 API 出问题，
-         * 也不会永远停留在“检测中”
-         */
 
-        document.getElementById("system").textContent =
-            "检测失败";
+        console.error(
+            "Device Detector:",
+            error
+        );
 
-        document.getElementById("device").textContent =
-            "浏览器不支持部分检测功能";
 
-        document.getElementById("status").textContent =
-            "⚠ 检测过程中发生错误";
+        text(
+            "system",
+            "检测失败"
+        );
 
-        document.getElementById("status").className =
-            "status error";
+
+        text(
+            "device",
+            "浏览器不支持部分功能"
+        );
+
+
+        text(
+            "badge",
+            "⚠ 检测失败"
+        );
+
 
     }
 
 };
 
 
-/* =========================
-   页面加载后立即执行
-   ========================= */
+/* =====================================================
+   启动
+   ===================================================== */
 
 if (
-    document.readyState === "loading"
+    document.readyState ===
+    "loading"
 ) {
+
 
     document.addEventListener(
         "DOMContentLoaded",
+
         window.detectDevice
+
     );
 
-} else {
+
+}
+
+else {
+
 
     window.detectDevice();
+
 
 }
 
 
-/*
- * 最后的保险机制：
- *
- * 如果 JS 某个环节异常，
- * 5 秒后仍然显示“检测中”，
- * 就告诉用户发生了问题。
- */
+/* =====================================================
+   监听屏幕旋转
+   ===================================================== */
 
-setTimeout(function () {
+window.addEventListener(
+    "resize",
 
-    var status =
-        document.getElementById("status");
+    function () {
 
-    var system =
-        document.getElementById("system");
+        var orientation;
 
-    if (
-        system &&
-        system.textContent === "检测中..."
-    ) {
 
-        system.textContent = "检测失败";
+        if (
+            window.innerWidth >
+            window.innerHeight
+        ) {
 
-        status.textContent =
-            "⚠ 页面脚本没有正常执行";
+            orientation =
+                "横屏";
 
-        status.className =
-            "status error";
+        }
+
+        else {
+
+            orientation =
+                "竖屏";
+
+        }
+
+
+        text(
+            "orientation",
+            orientation
+        );
+
+
+        text(
+            "resolution",
+
+            screen.width +
+            " × " +
+            screen.height +
+            " px"
+        );
+
+
     }
 
-}, 5000);
+);
 
 
 })();
 
 </script>
 
+
 </body>
+
 </html>
