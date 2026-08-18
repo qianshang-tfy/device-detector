@@ -13,6 +13,46 @@ body{min-width:280px}
 .header p{margin:4px 0 0;color:#8e8e93;font-size:14px}
 .hero{background:#fff;border-radius:22px;padding:26px 15px;text-align:center;margin-bottom:14px;border:1px solid #e5e5ea;box-shadow:0 4px 18px rgba(0,0,0,.06)}
 .icon{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;font-size:68px;line-height:78px;height:78px;margin-bottom:5px}
+.robot{
+ display:inline-block;
+ position:relative;
+ width:58px;
+ height:48px;
+ margin-top:10px;
+ background:#777;
+ border-radius:13px;
+ vertical-align:middle;
+}
+.robot:before{
+ content:"";
+ position:absolute;
+ left:12px;
+ top:15px;
+ width:8px;
+ height:8px;
+ border-radius:50%;
+ background:#fff;
+ box-shadow:26px 0 0 #fff;
+}
+.robot:after{
+ content:"";
+ position:absolute;
+ left:27px;
+ top:-10px;
+ width:4px;
+ height:12px;
+ background:#777;
+}
+.robot span{
+ position:absolute;
+ left:21px;
+ top:-15px;
+ width:14px;
+ height:14px;
+ border-radius:50%;
+ background:#777;
+}
+
 .system{font-size:29px;line-height:38px;font-weight:bold}
 .device{margin-top:5px;color:#8e8e93;font-size:17px}
 .badge{display:inline-block;margin-top:12px;padding:6px 12px;border-radius:20px;background:#e8f8ed;color:#34a853;font-size:13px}
@@ -35,7 +75,7 @@ body{min-width:280px}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>设备检测</h1><p>Device Detector V5.2</p></div>
+<div class="header"><h1>设备检测</h1><p>Device Detector V5.4</p></div>
 
 <div class="hero">
 <div class="icon" id="icon">📱</div>
@@ -58,6 +98,17 @@ body{min-width:280px}
 <div class="row"><span class="label">可信度</span><span class="value" id="confidence">—</span></div>
 <div class="row"><span class="label">识别依据</span><span class="value" id="reason">—</span></div>
 <div class="notice">型号识别属于浏览器特征推断。普通网页无法直接读取 Apple 的硬件型号标识。</div>
+</div>
+
+<div class="card" id="androidDatabase" style="display:none">
+<h2>Android 设备资料</h2>
+<div class="database">
+<div class="row"><span class="label">品牌</span><span class="value" id="androidBrand">—</span></div>
+<div class="row"><span class="label">型号</span><span class="value" id="androidModel">—</span></div>
+<div class="row"><span class="label">Android 版本</span><span class="value" id="androidVersion">—</span></div>
+<div class="row"><span class="label">浏览器版本</span><span class="value" id="androidBrowser">—</span></div>
+<div class="row"><span class="label">Build 标识</span><span class="value" id="androidBuild">—</span></div>
+</div>
 </div>
 
 <div class="card" id="appleDatabase" style="display:none">
@@ -119,7 +170,9 @@ function iosVersion(s){
  return m[1]+"."+m[2]+(m[3]?"."+m[3]:"");
 }
 function androidVersion(s){
- var m=s.match(/Android[ \/]([0-9.]+)/i);
+ var m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
+ if(m)return m[1];
+ m=s.match(/Android[^;)]*;[^;)]*?([0-9]+(?:\.[0-9]+){1,2})/i);
  return m?m[1]:"未知";
 }
 function browserName(s){
@@ -158,6 +211,36 @@ function safariVersion(s){
 function majorVersion(v){
  var n=parseInt(v,10);
  return isNaN(n)?-1:n;
+}
+
+function androidInfo(s){
+ var brand="未知",model="未知",build="未知";
+ var m;
+ m=s.match(/;\s*([^;()]+?)\s+Build\/([^) ;]+)/i);
+ if(m){
+  model=m[1].replace(/^\s+|\s+$/g,"");
+  build=m[2];
+ }
+ if(/Redmi/i.test(s))brand="Redmi";
+ else if(/Xiaomi|MiuiBrowser|MIUI/i.test(s))brand="Xiaomi";
+ else if(/HUAWEI|Huawei/i.test(s))brand="Huawei";
+ else if(/HONOR|Honor/i.test(s))brand="HONOR";
+ else if(/OPPO/i.test(s))brand="OPPO";
+ else if(/vivo/i.test(s))brand="vivo";
+ else if(/Samsung|SM-[A-Z0-9-]+/i.test(s))brand="Samsung";
+ else if(/Pixel/i.test(s))brand="Google";
+ else if(/OnePlus|ONEPLUS/i.test(s))brand="OnePlus";
+ else if(/Meizu/i.test(s))brand="Meizu";
+ else if(/realme/i.test(s))brand="realme";
+ else if(/Lenovo/i.test(s))brand="Lenovo";
+ else if(/ASUS/i.test(s))brand="ASUS";
+ else if(/Nokia/i.test(s))brand="Nokia";
+ else if(/Sony/i.test(s))brand="Sony";
+ if(model==="未知"){
+  var p=s.match(/;\s*([^;()]+?)(?:\s+Build\/|\s*Build\/)/i);
+  if(p)model=p[1].replace(/^\s+|\s+$/g,"");
+ }
+ return {brand:brand,model:model,build:build};
 }
 
 function identify(ipad,iphone,ver,safari){
@@ -260,22 +343,39 @@ function hideDB(){var b=document.getElementById("appleDatabase");if(b)b.style.di
 function detect(){
  var s=ua(),p=navigator.platform||"",isIPad=/iPad/i.test(s)||(p==="MacIntel"&&(navigator.maxTouchPoints||0)>1);
  var isIPhone=/iPhone/i.test(s),isIPod=/iPod/i.test(s),isAndroid=/Android/i.test(s);
- var os="未知系统",ver="未知",device="未知设备",type="未知",icon="手机";
+ var os="未知系统",ver="未知",device="未知设备",type="未知",icon="手机",isRobot=false;
  if(isIPad){os="iOS / iPadOS";ver=iosVersion(s);device="iPad";type="平板电脑";icon="";}
  else if(isIPhone){os="iOS";ver=iosVersion(s);device="iPhone";type="智能手机";icon="";}
  else if(isIPod){os="iOS";ver=iosVersion(s);device="iPod touch";type="便携设备";icon="";}
- else if(isAndroid){os="Android";ver=androidVersion(s);device=/Mobile/i.test(s)?"Android 手机":"Android 平板";type=/Mobile/i.test(s)?"智能手机":"平板电脑";icon="Android";}
+ else if(isAndroid){os="Android";ver=androidVersion(s);device=/Mobile/i.test(s)?"Android 手机":"Android 平板";type=/Mobile/i.test(s)?"智能手机":"平板电脑";icon="";isRobot=true;}
  else if(/Windows/i.test(s)){os="Windows";device="Windows PC";type="电脑";icon="PC";}
  else if(/Mac OS X/i.test(s)){os="macOS";device="Mac";type="电脑";icon="";}
  else if(/Linux/i.test(s)){os="Linux";device="Linux PC";type="电脑";icon="Linux";}
 
- setText("icon",icon);
+ if(isRobot){var iconBox=document.getElementById("icon");if(iconBox){iconBox.innerHTML="<span class=\"robot\"><span></span></span>";}}
+ else{setText("icon",icon);}
  if(icon===""){var ie=document.getElementById("icon");if(ie){ie.style.fontFamily="Arial, Helvetica, sans-serif";ie.style.fontSize="72px";ie.style.lineHeight="80px";}}
  setText("system",os);setText("device",device);setText("badge","✓ 检测完成");
  setText("os",os);setText("version",ver);setText("type",type);setText("browser",browserName(s));
 
  var safari= safariVersion(s);
  var id=identify(isIPad,isIPhone,ver,safari);
+ if(isAndroid){
+ var ai=androidInfo(s),am=androidVersion(s);
+ id.model=ai.model!=="未知"?ai.model:(ai.brand!=="未知"?ai.brand+" Android 设备":"Android 设备");
+ id.confidence=(am!=="未知"&&ai.model!=="未知")?"较高":(am!=="未知"?"中":"低");
+ id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(ai.model!=="未知"?" + Build 型号 "+ai.model:"");
+ var ab=document.getElementById("androidDatabase");
+ if(ab)ab.style.display="block";
+ setText("androidBrand",ai.brand);
+ setText("androidModel",ai.model);
+ setText("androidVersion",am);
+ setText("androidBrowser",browserName(s));
+ setText("androidBuild",ai.build);
+}else{
+ var ab2=document.getElementById("androidDatabase");
+ if(ab2)ab2.style.display="none";
+}
  setText("model",id.model);setText("confidence",id.confidence);setText("reason",id.reason);
  var ce=document.getElementById("confidence");if(ce){ce.className="value "+(id.confidence==="较高"?"high":id.confidence==="中"?"medium":"low");}
  if(id.key)showDB(id.key);else hideDB();
@@ -291,13 +391,13 @@ function detect(){
  setText("cookie",navigator.cookieEnabled?"已启用":"已禁用");
  setText("ua",s);
 
- lastResult={device:device,os:os,version:ver,model:id.model,confidence:id.confidence,resolution:res,dpr:window.devicePixelRatio||1,browser:browserName(s),safari:safari};
+ lastResult={device:device,os:os,version:ver,model:id.model,confidence:id.confidence,resolution:res,dpr:window.devicePixelRatio||1,browser:browserName(s),safari:safari,androidVersion:isAndroid?ver:""};
 }
 
 function share(){
  var r=lastResult;
  if(!r){alert("检测尚未完成。");return;}
- var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.2";
+ var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.4";
  if(navigator.share){navigator.share({title:"设备检测",text:t});return;}
  var ta=document.createElement("textarea");ta.value=t;ta.style.position="absolute";ta.style.left="-9999px";
  document.body.appendChild(ta);ta.focus();ta.select();
