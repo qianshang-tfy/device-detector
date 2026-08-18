@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
+<title>设备检测</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #f2f2f7;
+    color: #1c1c1e;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+}
+
+.container {
+    width: calc(100% - 30px);
+    max-width: 720px;
+    margin: 25px auto 40px;
+}
+
+.header {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.header p {
+    margin: 8px 0 0;
+    color: #8e8e93;
+    font-size: 15px;
+}
+
+.result {
+    background: white;
+    border-radius: 24px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+    margin-bottom: 16px;
+}
+
+.icon {
+    font-size: 64px;
+    line-height: 1.2;
+}
+
+.system {
+    margin-top: 10px;
+    font-size: 29px;
+    font-weight: 700;
+}
+
+.device {
+    margin-top: 7px;
+    font-size: 17px;
+    color: #6e6e73;
+}
+
+.status {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #34c759;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.card h2 {
+    font-size: 18px;
+    margin: 0 0 10px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 13px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    color: #8e8e93;
+}
+
+.value {
+    text-align: right;
+    max-width: 65%;
+    word-break: break-word;
+}
+
+.ua {
+    background: #f2f2f7;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-all;
+    color: #636366;
+}
+
+button {
+    width: 100%;
+    border: 0;
+    border-radius: 15px;
+    padding: 15px;
+    background: #007aff;
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+button:active {
+    opacity: .6;
+}
+
+.footer {
+    text-align: center;
+    color: #8e8e93;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+.error {
+    color: #ff3b30;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>设备检测</h1>
+        <p>Device Detector</p >
+    </div>
+
+    <div class="result">
+
+        <div class="icon" id="icon">📱</div>
+
+        <div class="system" id="system">
+            检测中...
+        </div>
+
+        <div class="device" id="device">
+            请稍候
+        </div>
+
+        <div class="status" id="status">
+            正在读取设备信息
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>设备信息</h2>
+
+        <div class="row">
+            <span class="label">操作系统</span>
+            <span class="value" id="os">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">设备类型</span>
+            <span class="value" id="type">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">系统版本</span>
+            <span class="value" id="version">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">浏览器</span>
+            <span class="value" id="browser">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">屏幕</span>
+            <span class="value" id="screen">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">设备像素比</span>
+            <span class="value" id="dpr">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">触摸点</span>
+            <span class="value" id="touch">-</span>
+        </div>
+
+        <div class="row">
+            <span class="label">平台</span>
+            <span class="value" id="platform">-</span>
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>User-Agent</h2>
+
+        <div class="ua" id="ua">
+            -
+        </div>
+
+    </div>
+
+
+    <button onclick="detectDevice()">
+        重新检测
+    </button>
+
+
+    <div class="footer">
+        检测在本地完成，不上传设备信息
+    </div>
+
+</div>
+
+
+<script>
+
+(function () {
+
+"use strict";
+
+
+/* =========================
+   安全读取 navigator
+   ========================= */
+
+function getUA() {
+    try {
+        return navigator.userAgent || "";
+    } catch (e) {
+        return "";
+    }
+}
+
+
+function getPlatform() {
+    try {
+        return navigator.platform || "";
+    } catch (e) {
+        return "";
+    }
+}
+
+
+function getTouchPoints() {
+    try {
+        return Number(navigator.maxTouchPoints || 0);
+    } catch (e) {
+        return 0;
+    }
+}
+
+
+/* =========================
+   获取 iOS 版本
+   ========================= */
+
+function getIOSVersion(ua) {
+
+    var match = ua.match(
+        /OS (\d+)[._](\d+)(?:[._](\d+))?/i
+    );
+
+    if (!match) {
+        return "未知";
+    }
+
+    var version = match[1] + "." + match[2];
+
+    if (match[3]) {
+        version += "." + match[3];
+    }
+
+    return version;
+}
+
+
+/* =========================
+   获取 Android 版本
+   ========================= */
+
+function getAndroidVersion(ua) {
+
+    var match = ua.match(
+        /Android[ \/]([\d.]+)/i
+    );
+
+    if (!match) {
+        return "未知";
+    }
+
+    return match[1];
+}
+
+
+/* =========================
+   获取浏览器
+   ========================= */
+
+function getBrowser(ua) {
+
+    if (/CriOS/i.test(ua)) {
+        return "Chrome";
+    }
+
+    if (/FxiOS/i.test(ua)) {
+        return "Firefox";
+    }
+
+    if (/EdgiOS/i.test(ua)) {
+        return "Edge";
+    }
+
+    if (/OPiOS/i.test(ua)) {
+        return "Opera";
+    }
+
+    if (/DuckDuckGo/i.test(ua)) {
+        return "DuckDuckGo";
+    }
+
+    if (/GSA/i.test(ua)) {
+        return "Google App";
+    }
+
+    if (/Edg\//i.test(ua)) {
+        return "Microsoft Edge";
+    }
+
+    if (/OPR\//i.test(ua)) {
+        return "Opera";
+    }
+
+    if (/Chrome\//i.test(ua)) {
+        return "Google Chrome";
+    }
+
+    if (/Firefox\//i.test(ua)) {
+        return "Firefox";
+    }
+
+    if (/Safari\//i.test(ua)) {
+        return "Safari";
+    }
+
+    return "未知浏览器";
+}
+
+
+/* =========================
+   主检测函数
+   ========================= */
+
+window.detectDevice = function () {
+
+    try {
+
+        var ua = getUA();
+        var platform = getPlatform();
+        var touch = getTouchPoints();
+
+
+        var os = "未知";
+        var type = "未知";
+        var version = "未知";
+        var icon = "❓";
+
+
+        /*
+         * iPadOS 13+
+         *
+         * Safari 有时会报告：
+         *
+         * platform = MacIntel
+         *
+         * 但同时支持多点触摸。
+         *
+         * 因此：
+         *
+         * MacIntel + touch > 1
+         *
+         * 可以作为 iPadOS 的重要判断依据。
+         */
+
+        var isIPad =
+            /iPad/i.test(ua) ||
+            (
+                platform === "MacIntel" &&
+                touch > 1
+            );
+
+
+        var isIPhone =
+            /iPhone/i.test(ua);
+
+
+        var isIPod =
+            /iPod/i.test(ua);
+
+
+        var isAndroid =
+            /Android/i.test(ua);
+
+
+        /* =========================
+           Apple
+           ========================= */
+
+        if (isIPad) {
+
+            os = "iPadOS";
+            type = "iPad";
+            version = getIOSVersion(ua);
+            icon = "🍎";
+
+        }
+
+        else if (isIPhone) {
+
+            os = "iOS";
+            type = "iPhone";
+            version = getIOSVersion(ua);
+            icon = "🍎";
+
+        }
+
+        else if (isIPod) {
+
+            os = "iOS";
+            type = "iPod touch";
+            version = getIOSVersion(ua);
+            icon = "🍎";
+
+        }
+
+
+        /* =========================
+           Android
+           ========================= */
+
+        else if (isAndroid) {
+
+            os = "Android";
+
+            version = getAndroidVersion(ua);
+
+            if (/Mobile/i.test(ua)) {
+                type = "Android 手机";
+            } else {
+                type = "Android 平板";
+            }
+
+            icon = "🤖";
+
+        }
+
+
+        /* =========================
+           Windows
+           ========================= */
+
+        else if (/Windows/i.test(ua)) {
+
+            os = "Windows";
+            type = "Windows PC";
+            icon = "🪟";
+
+        }
+
+
+        /* =========================
+           macOS
+           ========================= */
+
+        else if (
+            /Mac OS X/i.test(ua) ||
+            /^Mac/i.test(platform)
+        ) {
+
+            os = "macOS";
+            type = "Mac";
+            icon = "🍎";
+
+        }
+
+
+        /* =========================
+           Linux
+           ========================= */
+
+        else if (/Linux/i.test(ua)) {
+
+            os = "Linux";
+            type = "Linux PC";
+            icon = "🐧";
+
+        }
+
+
+        /* =========================
+           ChromeOS
+           ========================= */
+
+        else if (/CrOS/i.test(ua)) {
+
+            os = "ChromeOS";
+            type = "Chromebook";
+            icon = "💻";
+
+        }
+
+
+        /* =========================
+           写入页面
+           ========================= */
+
+        document.getElementById("icon").textContent =
+            icon;
+
+        document.getElementById("system").textContent =
+            os;
+
+        document.getElementById("device").textContent =
+            type;
+
+        document.getElementById("status").textContent =
+            "✓ 检测完成";
+
+        document.getElementById("os").textContent =
+            os;
+
+        document.getElementById("type").textContent =
+            type;
+
+        document.getElementById("version").textContent =
+            version;
+
+        document.getElementById("browser").textContent =
+            getBrowser(ua);
+
+        document.getElementById("screen").textContent =
+            window.screen.width +
+            " × " +
+            window.screen.height;
+
+        document.getElementById("dpr").textContent =
+            window.devicePixelRatio || 1;
+
+        document.getElementById("touch").textContent =
+            touch;
+
+        document.getElementById("platform").textContent =
+            platform || "未知";
+
+        document.getElementById("ua").textContent =
+            ua || "无法读取 User-Agent";
+
+
+    }
+
+    catch (error) {
+
+        /*
+         * 即使某个 API 出问题，
+         * 也不会永远停留在“检测中”
+         */
+
+        document.getElementById("system").textContent =
+            "检测失败";
+
+        document.getElementById("device").textContent =
+            "浏览器不支持部分检测功能";
+
+        document.getElementById("status").textContent =
+            "⚠ 检测过程中发生错误";
+
+        document.getElementById("status").className =
+            "status error";
+
+    }
+
+};
+
+
+/* =========================
+   页面加载后立即执行
+   ========================= */
+
+if (
+    document.readyState === "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        window.detectDevice
+    );
+
+} else {
+
+    window.detectDevice();
+
+}
+
+
+/*
+ * 最后的保险机制：
+ *
+ * 如果 JS 某个环节异常，
+ * 5 秒后仍然显示“检测中”，
+ * 就告诉用户发生了问题。
+ */
+
+setTimeout(function () {
+
+    var status =
+        document.getElementById("status");
+
+    var system =
+        document.getElementById("system");
+
+    if (
+        system &&
+        system.textContent === "检测中..."
+    ) {
+
+        system.textContent = "检测失败";
+
+        status.textContent =
+            "⚠ 页面脚本没有正常执行";
+
+        status.className =
+            "status error";
+    }
+
+}, 5000);
+
+
+})();
+
+</script>
+
+</body>
+</html>
