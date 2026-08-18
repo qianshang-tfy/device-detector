@@ -14,13 +14,15 @@
 <meta name="apple-mobile-web-app-status-bar-style"
       content="black-translucent">
 
-<title>设备检测 - Device Detector</title>
+<title>设备检测 V5</title>
 
 
 <style>
 
 /* =====================================================
-   基础颜色
+   Device Detector V5
+   Legacy Safari Compatible
+   最低目标：iOS 6.1.3 Safari
    ===================================================== */
 
 html,
@@ -50,10 +52,6 @@ body {
 }
 
 
-/* =====================================================
-   主容器
-   ===================================================== */
-
 .container {
 
     width: 94%;
@@ -68,10 +66,6 @@ body {
 
 }
 
-
-/* =====================================================
-   标题
-   ===================================================== */
 
 .header {
 
@@ -103,10 +97,6 @@ body {
 
 }
 
-
-/* =====================================================
-   主结果
-   ===================================================== */
 
 .hero {
 
@@ -180,10 +170,6 @@ body {
 }
 
 
-/* =====================================================
-   卡片
-   ===================================================== */
-
 .card {
 
     background: #ffffff;
@@ -212,10 +198,6 @@ body {
 
 }
 
-
-/* =====================================================
-   信息行
-   ===================================================== */
 
 .row {
 
@@ -270,10 +252,6 @@ body {
 }
 
 
-/* =====================================================
-   可信度
-   ===================================================== */
-
 .high {
 
     color: #34a853;
@@ -299,10 +277,6 @@ body {
 }
 
 
-/* =====================================================
-   数据库信息
-   ===================================================== */
-
 .database {
 
     background: #f7f7f9;
@@ -327,10 +301,6 @@ body {
 }
 
 
-/* =====================================================
-   User Agent
-   ===================================================== */
-
 .ua {
 
     margin-top: 8px;
@@ -352,11 +322,7 @@ body {
 }
 
 
-/* =====================================================
-   按钮
-   ===================================================== */
-
-.detect-button {
+.button {
 
     display: block;
 
@@ -378,21 +344,38 @@ body {
 
     margin-top: 4px;
 
+    margin-bottom: 10px;
+
     -webkit-appearance: none;
 
 }
 
 
-.detect-button:active {
+.button:active {
 
     background: #005fc7;
 
 }
 
 
-/* =====================================================
-   页脚
-   ===================================================== */
+.button.secondary {
+
+    background: #ffffff;
+
+    color: #007aff;
+
+    border:
+        1px solid #007aff;
+
+}
+
+
+.button.secondary:active {
+
+    background: #f0f7ff;
+
+}
+
 
 .footer {
 
@@ -409,9 +392,26 @@ body {
 }
 
 
-/* =====================================================
-   深色模式
-   ===================================================== */
+.notice {
+
+    background: #fff8e6;
+
+    border: 1px solid #ffe2a8;
+
+    border-radius: 12px;
+
+    padding: 11px;
+
+    color: #8a6400;
+
+    font-size: 12px;
+
+    line-height: 18px;
+
+    margin-top: 10px;
+
+}
+
 
 @media screen and (prefers-color-scheme: dark) {
 
@@ -473,12 +473,15 @@ body {
 
     }
 
+
+    .button.secondary {
+
+        background: #1c1c1e;
+
+    }
+
 }
 
-
-/* =====================================================
-   大屏
-   ===================================================== */
 
 @media screen and (min-width: 700px) {
 
@@ -494,13 +497,6 @@ body {
         padding-top: 40px;
 
         padding-bottom: 40px;
-
-    }
-
-
-    .row {
-
-        min-height: 24px;
 
     }
 
@@ -532,10 +528,6 @@ body {
 
 }
 
-
-/* =====================================================
-   iPhone 小屏
-   ===================================================== */
 
 @media screen and (max-width: 360px) {
 
@@ -581,22 +573,14 @@ body {
 <div class="container">
 
 
-<!-- =====================================================
-     标题
-     ===================================================== -->
-
 <div class="header">
 
 <h1>设备检测</h1>
 
-<p>Device Detector V4</p>
+<p>Device Detector V5</p>
 
 </div>
 
-
-<!-- =====================================================
-     主结果
-     ===================================================== -->
 
 <div class="hero">
 
@@ -629,10 +613,6 @@ body {
 
 </div>
 
-
-<!-- =====================================================
-     系统信息
-     ===================================================== -->
 
 <div class="card">
 
@@ -701,10 +681,6 @@ body {
 </div>
 
 
-<!-- =====================================================
-     型号识别
-     ===================================================== -->
-
 <div class="card">
 
 <h2>设备型号识别</h2>
@@ -754,33 +730,40 @@ body {
 
 </div>
 
+
+<div
+    class="notice">
+
+型号识别属于浏览器特征推断。
+网页通常无法直接读取 Apple 的硬件型号标识。
+
 </div>
 
+</div>
 
-<!-- =====================================================
-     Apple 数据库
-     ===================================================== -->
 
 <div
     class="card"
     id="appleDatabase"
     style="display:none;">
 
-<h2>Apple 设备资料</h2>
+<h2> Apple 设备资料</h2>
 
 
 <div class="database">
 
 
 <div class="database-title">
-数据库资料（不是浏览器直接读取的数据）
+
+数据库资料
+
 </div>
 
 
 <div class="row">
 
 <span class="label">
-型号
+具体型号
 </span>
 
 <span
@@ -810,7 +793,7 @@ body {
 <div class="row">
 
 <span class="label">
-内存
+RAM
 </span>
 
 <span
@@ -855,6 +838,21 @@ body {
 <div class="row">
 
 <span class="label">
+初始系统
+</span>
+
+<span
+    class="value"
+    id="dbInitial">
+—
+</span>
+
+</div>
+
+
+<div class="row">
+
+<span class="label">
 最高官方系统
 </span>
 
@@ -866,15 +864,10 @@ body {
 
 </div>
 
-
 </div>
 
 </div>
 
-
-<!-- =====================================================
-     硬件
-     ===================================================== -->
 
 <div class="card">
 
@@ -943,10 +936,6 @@ body {
 </div>
 
 
-<!-- =====================================================
-     浏览器
-     ===================================================== -->
-
 <div class="card">
 
 <h2>浏览器环境</h2>
@@ -999,10 +988,6 @@ Cookie
 </div>
 
 
-<!-- =====================================================
-     User Agent
-     ===================================================== -->
-
 <div class="card">
 
 <h2>User-Agent</h2>
@@ -1017,16 +1002,22 @@ Cookie
 </div>
 
 
-<!-- =====================================================
-     重新检测
-     ===================================================== -->
-
 <button
     type="button"
-    class="detect-button"
+    class="button"
     id="detectButton">
 
 重新检测
+
+</button>
+
+
+<button
+    type="button"
+    class="button secondary"
+    id="shareButton">
+
+分享检测结果
 
 </button>
 
@@ -1050,9 +1041,8 @@ Cookie
 <script>
 
 /* =====================================================
-   Device Detector V4
-   Legacy Safari Compatible
-   ES5 JavaScript
+   Device Detector V5
+   ES5 / iOS 6 Compatible
    ===================================================== */
 
 (function () {
@@ -1060,33 +1050,41 @@ Cookie
 "use strict";
 
 
-/* =====================================================
-   简单文本输出
-   ===================================================== */
+var lastResult = null;
+
 
 function setText(id, value) {
 
     var element =
         document.getElementById(id);
 
-    if (element) {
 
-        element.innerHTML = "";
+    if (!element) {
 
-        element.appendChild(
-            document.createTextNode(
-                String(value)
-            )
+        return;
+
+    }
+
+
+    while (
+        element.firstChild
+    ) {
+
+        element.removeChild(
+            element.firstChild
         );
 
     }
 
+
+    element.appendChild(
+        document.createTextNode(
+            String(value)
+        )
+    );
+
 }
 
-
-/* =====================================================
-   UA
-   ===================================================== */
 
 function getUA() {
 
@@ -1095,10 +1093,6 @@ function getUA() {
 }
 
 
-/* =====================================================
-   Platform
-   ===================================================== */
-
 function getPlatform() {
 
     return navigator.platform || "";
@@ -1106,20 +1100,12 @@ function getPlatform() {
 }
 
 
-/* =====================================================
-   Touch
-   ===================================================== */
-
 function getTouch() {
 
     return navigator.maxTouchPoints || 0;
 
 }
 
-
-/* =====================================================
-   iOS 版本
-   ===================================================== */
 
 function getIOSVersion(ua) {
 
@@ -1156,10 +1142,6 @@ function getIOSVersion(ua) {
 }
 
 
-/* =====================================================
-   Android 版本
-   ===================================================== */
-
 function getAndroidVersion(ua) {
 
     var match =
@@ -1180,10 +1162,6 @@ function getAndroidVersion(ua) {
 }
 
 
-/* =====================================================
-   浏览器
-   ===================================================== */
-
 function getBrowser(ua) {
 
     var match;
@@ -1194,7 +1172,7 @@ function getBrowser(ua) {
             ua.match(
                 /CriOS\/([\d.]+)/i
             ))
-    ) {
+    {
 
         return "Chrome " + match[1];
 
@@ -1206,7 +1184,7 @@ function getBrowser(ua) {
             ua.match(
                 /FxiOS\/([\d.]+)/i
             ))
-    ) {
+    {
 
         return "Firefox " + match[1];
 
@@ -1218,7 +1196,7 @@ function getBrowser(ua) {
             ua.match(
                 /EdgiOS\/([\d.]+)/i
             ))
-    ) {
+    {
 
         return "Edge " + match[1];
 
@@ -1230,7 +1208,7 @@ function getBrowser(ua) {
             ua.match(
                 /Chrome\/([\d.]+)/i
             ))
-    ) {
+    {
 
         return "Chrome " + match[1];
 
@@ -1242,7 +1220,7 @@ function getBrowser(ua) {
             ua.match(
                 /Firefox\/([\d.]+)/i
             ))
-    ) {
+    {
 
         return "Firefox " + match[1];
 
@@ -1254,7 +1232,7 @@ function getBrowser(ua) {
             ua.match(
                 /Version\/([\d.]+).*Safari/i
             ))
-    ) {
+    {
 
         return "Safari " + match[1];
 
@@ -1278,7 +1256,7 @@ var appleDatabase = {
     {
 
         model:
-            "iPad 2 (iPad2,1 / iPad2,2 / iPad2,3 / iPad2,4)",
+            "iPad 2（iPad2,1 / iPad2,2 / iPad2,3 / iPad2,4）",
 
         chip:
             "Apple A5",
@@ -1292,8 +1270,95 @@ var appleDatabase = {
         year:
             "2011",
 
+        initial:
+            "iOS 4.3",
+
         ios:
-            "最高 iOS 9.3.6"
+            "iOS 9.3.6"
+
+    },
+
+
+    "ipad3":
+
+    {
+
+        model:
+            "iPad（第 3 代）",
+
+        chip:
+            "Apple A5X",
+
+        ram:
+            "1 GB",
+
+        display:
+            "9.7 英寸 Retina，2048 × 1536",
+
+        year:
+            "2012",
+
+        initial:
+            "iOS 5.1",
+
+        ios:
+            "iOS 9.3.6"
+
+    },
+
+
+    "ipad4":
+
+    {
+
+        model:
+            "iPad（第 4 代）",
+
+        chip:
+            "Apple A6X",
+
+        ram:
+            "1 GB",
+
+        display:
+            "9.7 英寸 Retina，2048 × 1536",
+
+        year:
+            "2012",
+
+        initial:
+            "iOS 6.0",
+
+        ios:
+            "iOS 10.3.4"
+
+    },
+
+
+    "ipadmini":
+
+    {
+
+        model:
+            "iPad mini（第 1 代）",
+
+        chip:
+            "Apple A5",
+
+        ram:
+            "512 MB",
+
+        display:
+            "7.9 英寸，1024 × 768",
+
+        year:
+            "2012",
+
+        initial:
+            "iOS 6.0",
+
+        ios:
+            "iOS 9.3.6"
 
     },
 
@@ -1317,8 +1382,11 @@ var appleDatabase = {
         year:
             "2010",
 
+        initial:
+            "iOS 4",
+
         ios:
-            "最高 iOS 7.1.2"
+            "iOS 7.1.2"
 
     },
 
@@ -1342,8 +1410,11 @@ var appleDatabase = {
         year:
             "2011",
 
+        initial:
+            "iOS 5",
+
         ios:
-            "最高 iOS 9.3.6"
+            "iOS 9.3.6"
 
     },
 
@@ -1367,8 +1438,11 @@ var appleDatabase = {
         year:
             "2012",
 
+        initial:
+            "iOS 6",
+
         ios:
-            "最高 iOS 10.3.4"
+            "iOS 10.3.4"
 
     },
 
@@ -1392,8 +1466,11 @@ var appleDatabase = {
         year:
             "2013",
 
+        initial:
+            "iOS 7",
+
         ios:
-            "最高 iOS 12.5.x"
+            "iOS 12.5.x"
 
     },
 
@@ -1403,22 +1480,53 @@ var appleDatabase = {
     {
 
         model:
-            "iPhone 6 / iPhone 6s",
+            "iPhone 6",
 
         chip:
-            "Apple A8 / A9",
+            "Apple A8",
 
         ram:
-            "1 GB / 2 GB",
+            "1 GB",
 
         display:
             "4.7 英寸，1334 × 750",
 
         year:
-            "2014 / 2015",
+            "2014",
+
+        initial:
+            "iOS 8",
 
         ios:
-            "最高 iOS 12.5.x / 15.8.x"
+            "iOS 12.5.x"
+
+    },
+
+
+    "iphone6s":
+
+    {
+
+        model:
+            "iPhone 6s",
+
+        chip:
+            "Apple A9",
+
+        ram:
+            "2 GB",
+
+        display:
+            "4.7 英寸，1334 × 750",
+
+        year:
+            "2015",
+
+        initial:
+            "iOS 9",
+
+        ios:
+            "iOS 15.8.x"
 
     },
 
@@ -1428,22 +1536,53 @@ var appleDatabase = {
     {
 
         model:
-            "iPhone 6 Plus / 6s Plus",
+            "iPhone 6 Plus",
 
         chip:
-            "Apple A8 / A9",
+            "Apple A8",
 
         ram:
-            "1 GB / 2 GB",
+            "1 GB",
 
         display:
             "5.5 英寸，1920 × 1080",
 
         year:
-            "2014 / 2015",
+            "2014",
+
+        initial:
+            "iOS 8",
 
         ios:
-            "最高 iOS 12.5.x / 15.8.x"
+            "iOS 12.5.x"
+
+    },
+
+
+    "iphone6splus":
+
+    {
+
+        model:
+            "iPhone 6s Plus",
+
+        chip:
+            "Apple A9",
+
+        ram:
+            "2 GB",
+
+        display:
+            "5.5 英寸，1920 × 1080",
+
+        year:
+            "2015",
+
+        initial:
+            "iOS 9",
+
+        ios:
+            "iOS 15.8.x"
 
     }
 
@@ -1451,7 +1590,464 @@ var appleDatabase = {
 
 
 /* =====================================================
-   Apple 数据库显示
+   根据屏幕 + 系统推断 Apple 型号
+   ===================================================== */
+
+function detectAppleModel(
+    isIPad,
+    isIPhone,
+    iosVersion
+) {
+
+
+    var w =
+        Math.min(
+            screen.width,
+            screen.height
+        );
+
+
+    var h =
+        Math.max(
+            screen.width,
+            screen.height
+        );
+
+
+    var dpr =
+        window.devicePixelRatio || 1;
+
+
+    var result = {
+
+        model:
+            "无法确定",
+
+        confidence:
+            "低",
+
+        reason:
+            "特征不足",
+
+        database:
+            null
+
+    };
+
+
+    var major =
+        parseInt(
+            iosVersion.split(".")[0],
+            10
+        );
+
+
+    if (isIPad) {
+
+
+        /* iPad 2 */
+
+        if (
+            w === 768 &&
+            h === 1024 &&
+            dpr <= 1.1
+        ) {
+
+
+            if (
+                !isNaN(major) &&
+                major <= 9
+            ) {
+
+                result.model =
+                    "iPad 2";
+
+                result.confidence =
+                    "较高";
+
+                result.reason =
+                    "768 × 1024 + DPR 约 1 + iOS 版本特征";
+
+                result.database =
+                    "ipad2";
+
+            }
+
+            else {
+
+                result.model =
+                    "早期 9.7 英寸 iPad";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "768 × 1024 + DPR 约 1";
+
+            }
+
+        }
+
+
+        /* Retina 9.7 */
+
+        else if (
+            w === 768 &&
+            h === 1024 &&
+            dpr >= 1.8
+        ) {
+
+            if (
+                !isNaN(major) &&
+                major <= 9
+            ) {
+
+                result.model =
+                    "iPad 3 / iPad 4";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "768 × 1024 CSS 像素 + Retina DPR";
+
+            }
+
+            else {
+
+                result.model =
+                    "9.7 英寸 Retina iPad";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "768 × 1024 + DPR 约 2";
+
+            }
+
+        }
+
+
+        /* iPad mini */
+
+        else if (
+            w === 768 &&
+            h === 1024 &&
+            dpr <= 1.1
+        ) {
+
+            result.model =
+                "iPad 2 / iPad mini";
+
+            result.confidence =
+                "低";
+
+            result.reason =
+                "两者均可能使用 1024 × 768";
+
+        }
+
+
+        /* 10.2 */
+
+        else if (
+            w === 810 &&
+            h === 1080
+        ) {
+
+            result.model =
+                "10.2 英寸 iPad";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "810 × 1080";
+
+        }
+
+
+        /* 10.5 */
+
+        else if (
+            w === 834 &&
+            h === 1112
+        ) {
+
+            result.model =
+                "10.5 英寸 iPad";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "834 × 1112";
+
+        }
+
+
+        /* 11 */
+
+        else if (
+            w === 834 &&
+            h === 1194
+        ) {
+
+            result.model =
+                "11 英寸 iPad";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "834 × 1194";
+
+        }
+
+
+        /* 12.9 */
+
+        else if (
+            w === 1024 &&
+            h === 1366
+        ) {
+
+            result.model =
+                "12.9 英寸 iPad Pro";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "1024 × 1366";
+
+        }
+
+    }
+
+
+    else if (isIPhone) {
+
+
+        /* 3.5 英寸 */
+
+        if (
+            w === 320 &&
+            h === 480
+        ) {
+
+            if (
+                !isNaN(major) &&
+                major <= 7
+            ) {
+
+                result.model =
+                    "iPhone 4";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "320 × 480 + iOS 版本";
+
+                result.database =
+                    "iphone4";
+
+            }
+
+            else {
+
+                result.model =
+                    "iPhone 4 / 4S";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "320 × 480";
+
+            }
+
+        }
+
+
+        /* 4 英寸 */
+
+        else if (
+            w === 320 &&
+            h === 568
+        ) {
+
+            if (
+                !isNaN(major) &&
+                major <= 10
+            ) {
+
+                result.model =
+                    "iPhone 5 / 5c / 5s";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "320 × 568 + iOS 版本";
+
+            }
+
+            else {
+
+                result.model =
+                    "4 英寸 iPhone";
+
+                result.confidence =
+                    "较高";
+
+                result.reason =
+                    "320 × 568";
+
+            }
+
+        }
+
+
+        /* 4.7 */
+
+        else if (
+            w === 375 &&
+            h === 667
+        ) {
+
+            if (
+                !isNaN(major) &&
+                major >= 9
+            ) {
+
+                result.model =
+                    "iPhone 6s";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "375 × 667 + iOS 9 或更高版本";
+
+                result.database =
+                    "iphone6s";
+
+            }
+
+            else {
+
+                result.model =
+                    "iPhone 6";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "375 × 667";
+
+                result.database =
+                    "iphone6";
+
+            }
+
+        }
+
+
+        /* 5.5 */
+
+        else if (
+            w === 414 &&
+            h === 736
+        ) {
+
+            if (
+                !isNaN(major) &&
+                major >= 9
+            ) {
+
+                result.model =
+                    "iPhone 6s Plus";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "414 × 736 + iOS 9 或更高版本";
+
+                result.database =
+                    "iphone6splus";
+
+            }
+
+            else {
+
+                result.model =
+                    "iPhone 6 Plus";
+
+                result.confidence =
+                    "中";
+
+                result.reason =
+                    "414 × 736";
+
+                result.database =
+                    "iphone6plus";
+
+            }
+
+        }
+
+
+        /* X */
+
+        else if (
+            w === 375 &&
+            h === 812
+        ) {
+
+            result.model =
+                "全面屏 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "375 × 812";
+
+        }
+
+
+        /* XR / 11 */
+
+        else if (
+            w === 414 &&
+            h === 896
+        ) {
+
+            result.model =
+                "6.1 英寸全面屏 iPhone";
+
+            result.confidence =
+                "较高";
+
+            result.reason =
+                "414 × 896";
+
+        }
+
+    }
+
+
+    return result;
+
+}
+
+
+/* =====================================================
+   Apple 数据显示
    ===================================================== */
 
 function showAppleDatabase(key) {
@@ -1512,16 +2108,18 @@ function showAppleDatabase(key) {
 
 
     setText(
+        "dbInitial",
+        data.initial
+    );
+
+
+    setText(
         "dbIOS",
         data.ios
     );
 
 }
 
-
-/* =====================================================
-   隐藏 Apple 数据库
-   ===================================================== */
 
 function hideAppleDatabase() {
 
@@ -1542,406 +2140,195 @@ function hideAppleDatabase() {
 
 
 /* =====================================================
-   型号检测
+   分享文本
    ===================================================== */
 
-function detectModel(
-    isIPad,
-    isIPhone,
-    isIPod,
-    isAndroid
-) {
+function buildShareText() {
 
 
-    var result = {
+    if (!lastResult) {
 
-        model: "无法确定",
-
-        confidence: "低",
-
-        reason:
-            "浏览器没有提供足够的硬件型号信息",
-
-        database: null
-
-    };
-
-
-    var w =
-        Math.min(
-            screen.width,
-            screen.height
-        );
-
-
-    var h =
-        Math.max(
-            screen.width,
-            screen.height
-        );
-
-
-    var dpr =
-        window.devicePixelRatio || 1;
-
-
-    /* =================================================
-       iPad
-       ================================================= */
-
-    if (isIPad) {
-
-
-        /*
-         * iPad 2
-         */
-
-        if (
-            w === 768 &&
-            h === 1024 &&
-            dpr <= 1.1
-        ) {
-
-            result.model =
-                "iPad 2";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "768 × 1024，DPR 约 1";
-
-            result.database =
-                "ipad2";
-
-        }
-
-
-        /*
-         * Retina 9.7
-         */
-
-        else if (
-            w === 768 &&
-            h === 1024 &&
-            dpr >= 1.8
-        ) {
-
-            result.model =
-                "9.7 英寸 Retina iPad";
-
-            result.confidence =
-                "中";
-
-            result.reason =
-                "768 × 1024，DPR 约 2";
-
-        }
-
-
-        /*
-         * 10.2
-         */
-
-        else if (
-            w === 810 &&
-            h === 1080
-        ) {
-
-            result.model =
-                "10.2 英寸 iPad";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "810 × 1080";
-
-        }
-
-
-        /*
-         * 10.5
-         */
-
-        else if (
-            w === 834 &&
-            h === 1112
-        ) {
-
-            result.model =
-                "10.5 英寸 iPad";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "834 × 1112";
-
-        }
-
-
-        /*
-         * 11
-         */
-
-        else if (
-            w === 834 &&
-            h === 1194
-        ) {
-
-            result.model =
-                "11 英寸 iPad Pro";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "834 × 1194";
-
-        }
-
-
-        /*
-         * 12.9
-         */
-
-        else if (
-            w === 1024 &&
-            h === 1366
-        ) {
-
-            result.model =
-                "12.9 英寸 iPad Pro";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "1024 × 1366";
-
-        }
-
-
-        else {
-
-            result.model =
-                "iPad（具体型号未知）";
-
-            result.confidence =
-                "低";
-
-            result.reason =
-                "确认是 iPad，但特征不足";
-
-        }
+        return "设备检测尚未完成。";
 
     }
 
 
-    /* =================================================
-       iPhone
-       ================================================= */
+    var r =
+        lastResult;
 
-    else if (isIPhone) {
 
+    var text =
+        " 设备检测\n\n" +
 
-        /*
-         * 3.5
-         */
+        "设备：" +
+        r.device +
+        "\n" +
 
-        if (
-            w === 320 &&
-            h === 480
-        ) {
+        "系统：" +
+        r.os +
+        " " +
+        r.version +
+        "\n" +
 
-            result.model =
-                "3.5 英寸 iPhone";
+        "型号：" +
+        r.model +
+        "\n" +
 
-            result.confidence =
-                "较高";
+        "可信度：" +
+        r.confidence +
+        "\n" +
 
-            result.reason =
-                "320 × 480";
+        "屏幕：" +
+        r.resolution +
+        "\n" +
 
-            /*
-             * iOS 6 设备中
-             * 可能是 iPhone 4 / 4S
-             */
+        "DPR：" +
+        r.dpr +
+        "\n" +
 
-        }
+        "浏览器：" +
+        r.browser +
+        "\n\n" +
 
+        "Device Detector V5";
 
-        /*
-         * 4 英寸
-         */
 
-        else if (
-            w === 320 &&
-            h === 568
-        ) {
-
-            result.model =
-                "4 英寸 iPhone";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "320 × 568";
-
-        }
-
-
-        /*
-         * 4.7
-         */
-
-        else if (
-            w === 375 &&
-            h === 667
-        ) {
-
-            result.model =
-                "4.7 英寸 iPhone";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "375 × 667";
-
-            result.database =
-                "iphone6";
-
-        }
-
-
-        /*
-         * 5.5
-         */
-
-        else if (
-            w === 414 &&
-            h === 736
-        ) {
-
-            result.model =
-                "5.5 英寸 iPhone Plus";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "414 × 736";
-
-            result.database =
-                "iphone6plus";
-
-        }
-
-
-        /*
-         * X 系列
-         */
-
-        else if (
-            w === 375 &&
-            h === 812
-        ) {
-
-            result.model =
-                "5.8 英寸全面屏 iPhone";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "375 × 812";
-
-        }
-
-
-        /*
-         * XR / 11
-         */
-
-        else if (
-            w === 414 &&
-            h === 896
-        ) {
-
-            result.model =
-                "6.1 英寸 iPhone";
-
-            result.confidence =
-                "较高";
-
-            result.reason =
-                "414 × 896";
-
-        }
-
-
-        else {
-
-            result.model =
-                "iPhone（具体型号未知）";
-
-            result.confidence =
-                "低";
-
-            result.reason =
-                "确认是 iPhone，但特征不足";
-
-        }
-
-    }
-
-
-    /* =================================================
-       iPod
-       ================================================= */
-
-    else if (isIPod) {
-
-        result.model =
-            "iPod touch";
-
-        result.confidence =
-            "中";
-
-        result.reason =
-            "User-Agent 明确包含 iPod";
-
-    }
-
-
-    /* =================================================
-       Android
-       ================================================= */
-
-    else if (isAndroid) {
-
-        result.model =
-            "Android 设备";
-
-        result.confidence =
-            "低";
-
-        result.reason =
-            "Android 浏览器通常不会可靠提供硬件型号";
-
-    }
-
-
-    return result;
+    return text;
 
 }
 
 
 /* =====================================================
-   主检测函数
+   复制文本
+   ===================================================== */
+
+function copyText(text) {
+
+
+    /*
+     * 老 Safari / iOS 6
+     * 使用 textarea + selection
+     */
+
+    var textarea =
+        document.createElement(
+            "textarea"
+        );
+
+
+    textarea.value =
+        text;
+
+
+    textarea.style.position =
+        "absolute";
+
+    textarea.style.left =
+        "-9999px";
+
+
+    document.body.appendChild(
+        textarea
+    );
+
+
+    textarea.focus();
+
+    textarea.select();
+
+
+    var success = false;
+
+
+    try {
+
+        success =
+            document.execCommand(
+                "copy"
+            );
+
+    }
+
+    catch (e) {
+
+        success =
+            false;
+
+    }
+
+
+    document.body.removeChild(
+        textarea
+    );
+
+
+    return success;
+
+}
+
+
+/* =====================================================
+   分享
+   ===================================================== */
+
+function shareResult() {
+
+
+    var text =
+        buildShareText();
+
+
+    /*
+     * 新浏览器
+     */
+
+    if (
+        navigator.share
+    ) {
+
+        navigator.share({
+
+            title:
+                "设备检测",
+
+            text:
+                text
+
+        });
+
+
+        return;
+
+    }
+
+
+    /*
+     * 旧 Safari
+     */
+
+    if (
+        copyText(text)
+    ) {
+
+        alert(
+            "检测结果已经复制到剪贴板，可以粘贴到微信、短信或其他应用中分享。"
+        );
+
+    }
+
+    else {
+
+        alert(
+            text
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   主检测
    ===================================================== */
 
 function detectDevice() {
@@ -2006,14 +2393,10 @@ function detectDevice() {
             "📱";
 
 
-        /* =================================================
-           iPad
-           ================================================= */
-
         if (isIPad) {
 
             os =
-                "iPadOS";
+                "iPadOS / iOS";
 
             version =
                 getIOSVersion(ua);
@@ -2029,10 +2412,6 @@ function detectDevice() {
 
         }
 
-
-        /* =================================================
-           iPhone
-           ================================================= */
 
         else if (isIPhone) {
 
@@ -2054,10 +2433,6 @@ function detectDevice() {
         }
 
 
-        /* =================================================
-           iPod
-           ================================================= */
-
         else if (isIPod) {
 
             os =
@@ -2077,10 +2452,6 @@ function detectDevice() {
 
         }
 
-
-        /* =================================================
-           Android
-           ================================================= */
 
         else if (isAndroid) {
 
@@ -2119,10 +2490,6 @@ function detectDevice() {
         }
 
 
-        /* =================================================
-           Windows
-           ================================================= */
-
         else if (
             /Windows/i.test(ua)
         ) {
@@ -2141,10 +2508,6 @@ function detectDevice() {
 
         }
 
-
-        /* =================================================
-           ChromeOS
-           ================================================= */
 
         else if (
             /CrOS/i.test(ua)
@@ -2165,10 +2528,6 @@ function detectDevice() {
         }
 
 
-        /* =================================================
-           macOS
-           ================================================= */
-
         else if (
             /Mac OS X/i.test(ua)
         ) {
@@ -2187,10 +2546,6 @@ function detectDevice() {
 
         }
 
-
-        /* =================================================
-           Linux
-           ================================================= */
 
         else if (
             /Linux/i.test(ua)
@@ -2211,22 +2566,13 @@ function detectDevice() {
         }
 
 
-        /* =================================================
-           Apple 型号
-           ================================================= */
-
-        var modelInfo =
-            detectModel(
+        var appleModel =
+            detectAppleModel(
                 isIPad,
                 isIPhone,
-                isIPod,
-                isAndroid
+                version
             );
 
-
-        /* =================================================
-           主结果
-           ================================================= */
 
         setText(
             "icon",
@@ -2252,10 +2598,6 @@ function detectDevice() {
         );
 
 
-        /* =================================================
-           系统
-           ================================================= */
-
         setText(
             "os",
             os
@@ -2280,31 +2622,23 @@ function detectDevice() {
         );
 
 
-        /* =================================================
-           型号
-           ================================================= */
-
         setText(
             "model",
-            modelInfo.model
+            appleModel.model
         );
 
 
         setText(
             "confidence",
-            modelInfo.confidence
+            appleModel.confidence
         );
 
 
         setText(
             "reason",
-            modelInfo.reason
+            appleModel.reason
         );
 
-
-        /* =================================================
-           可信度颜色
-           ================================================= */
 
         var confidence =
             document.getElementById(
@@ -2319,7 +2653,7 @@ function detectDevice() {
 
 
             if (
-                modelInfo.confidence ===
+                appleModel.confidence ===
                 "较高"
             ) {
 
@@ -2329,7 +2663,7 @@ function detectDevice() {
             }
 
             else if (
-                modelInfo.confidence ===
+                appleModel.confidence ===
                 "中"
             ) {
 
@@ -2348,88 +2682,59 @@ function detectDevice() {
         }
 
 
-        /* =================================================
-           Apple 数据库
-           ================================================= */
-
         if (
-            modelInfo.database
+            appleModel.database
         ) {
 
             showAppleDatabase(
-                modelInfo.database
+                appleModel.database
             );
 
         }
 
 
-        /* =================================================
-           硬件
-           ================================================= */
-
-        setText(
-            "resolution",
-
+        var resolution =
             screen.width +
             " × " +
             screen.height +
-            " px"
+            " px";
+
+
+        var dpr =
+            window.devicePixelRatio ||
+            1;
+
+
+        setText(
+            "resolution",
+            resolution
         );
 
 
         setText(
             "dpr",
-
-            window.devicePixelRatio ||
-            1
+            dpr
         );
 
 
         setText(
             "touch",
-
             touch
         );
 
 
-        /* =================================================
-           方向
-           ================================================= */
-
-        var orientation;
-
-
-        if (
-            window.innerWidth >
-            window.innerHeight
-        ) {
-
-            orientation =
-                "横屏";
-
-        }
-
-        else {
-
-            orientation =
-                "竖屏";
-
-        }
-
-
         setText(
             "orientation",
-            orientation
+
+            window.innerWidth >
+            window.innerHeight
+                ? "横屏"
+                : "竖屏"
         );
 
 
-        /* =================================================
-           浏览器环境
-           ================================================= */
-
         setText(
             "platform",
-
             platform ||
             "未知"
         );
@@ -2453,19 +2758,42 @@ function detectDevice() {
         );
 
 
-        /* =================================================
-           UA
-           ================================================= */
-
         setText(
             "ua",
-
-            ua ||
-            "无法读取 User-Agent"
+            ua
         );
 
 
+        lastResult = {
+
+            device:
+                device,
+
+            os:
+                os,
+
+            version:
+                version,
+
+            model:
+                appleModel.model,
+
+            confidence:
+                appleModel.confidence,
+
+            resolution:
+                resolution,
+
+            dpr:
+                dpr,
+
+            browser:
+                getBrowser(ua)
+
+        };
+
     }
+
 
     catch (error) {
 
@@ -2487,7 +2815,6 @@ function detectDevice() {
             "⚠ 检测失败"
         );
 
-
     }
 
 }
@@ -2500,16 +2827,30 @@ function detectDevice() {
 function init() {
 
 
-    var button =
+    var detectButton =
         document.getElementById(
             "detectButton"
         );
 
 
-    if (button) {
+    var shareButton =
+        document.getElementById(
+            "shareButton"
+        );
 
-        button.onclick =
+
+    if (detectButton) {
+
+        detectButton.onclick =
             detectDevice;
+
+    }
+
+
+    if (shareButton) {
+
+        shareButton.onclick =
+            shareResult;
 
     }
 
@@ -2518,10 +2859,6 @@ function init() {
 
 }
 
-
-/* =====================================================
-   老 Safari 兼容初始化
-   ===================================================== */
 
 if (
     document.readyState ===
@@ -2559,10 +2896,6 @@ else {
 }
 
 
-/* =====================================================
-   旋转/尺寸变化
-   ===================================================== */
-
 if (
     window.addEventListener
 ) {
@@ -2571,33 +2904,6 @@ if (
         "resize",
         function () {
 
-            var orientation;
-
-
-            if (
-                window.innerWidth >
-                window.innerHeight
-            ) {
-
-                orientation =
-                    "横屏";
-
-            }
-
-            else {
-
-                orientation =
-                    "竖屏";
-
-            }
-
-
-            setText(
-                "orientation",
-                orientation
-            );
-
-
             setText(
                 "resolution",
 
@@ -2605,6 +2911,16 @@ if (
                 " × " +
                 screen.height +
                 " px"
+            );
+
+
+            setText(
+                "orientation",
+
+                window.innerWidth >
+                window.innerHeight
+                    ? "横屏"
+                    : "竖屏"
             );
 
         },
