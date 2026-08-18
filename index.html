@@ -158,6 +158,31 @@ body{min-width:280px}
 
 var lastResult=null;
 
+// 修复 1：补充缺失的 Apple 设备数据库字典
+var db = {
+ "ipad2": ["iPad 2", "A5", "512MB", "9.7英寸", "2011", "iOS 4.3", "iOS 9.3.6"],
+ "iphone4": ["iPhone 4", "A4", "512MB", "3.5英寸", "2010", "iOS 4.0", "iOS 7.1.2"],
+ "iphone4s": ["iPhone 4S", "A5", "512MB", "3.5英寸", "2011", "iOS 5.0", "iOS 9.3.6"],
+ "iphone5": ["iPhone 5", "A6", "1GB", "4.0英寸", "2012", "iOS 6.0", "iOS 10.3.4"],
+ "iphone5s": ["iPhone 5s", "A7", "1GB", "4.0英寸", "2013", "iOS 7.0", "iOS 12.5.5"],
+ "iphone6": ["iPhone 6", "A8", "1GB", "4.7英寸", "2014", "iOS 8.0", "iOS 12.5.5"],
+ "iphone6plus": ["iPhone 6 Plus", "A8", "1GB", "5.5英寸", "2014", "iOS 8.0", "iOS 12.5.5"],
+ "iphone6s": ["iPhone 6s", "A9", "2GB", "4.7英寸", "2015", "iOS 9.0", "iOS 15"],
+ "iphone6splus": ["iPhone 6s Plus", "A9", "2GB", "5.5英寸", "2015", "iOS 9.0", "iOS 15"]
+};
+
+// 修复 2：补充获取 Safari 版本的函数
+function safariVersion(s){
+ var m = s.match(/Version\/([0-9.]+)/i);
+ return m ? m[1] : "未知";
+}
+
+// 修复 3：补充获取主版本号的函数
+function majorVersion(v){
+ if (!v || v === "未知") return 0;
+ return parseInt(v.split('.')[0], 10) || 0;
+}
+
 function setText(id,value){
  var e=document.getElementById(id);
  if(!e)return;
@@ -174,11 +199,8 @@ function iosVersion(s){
 function androidVersion(s){
  var m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
  if(m)return m[1];
-
- /* 少数 WebView/厂商 UA */
  m=s.match(/\bAndroid\s*([0-9]+)\b/i);
  if(m)return m[1];
-
  return "未知";
 }
 function browserName(s){
@@ -203,30 +225,18 @@ function browserName(s){
 function androidInfo(s){
  var brand="未知",model="未知",build="未知",code="未知";
  var m;
-
- /* Android 传统 UA:
-    Mozilla/5.0 (Linux; Android 12; M2007J22G Build/SKQ1...)
-    或 Android 12; M2007J22G
- */
  m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
-
- /* Build 标识 */
  m=s.match(/\bBuild\/([A-Za-z0-9._-]+)/i);
  if(m)build=m[1];
-
- /* Build/ 前面的设备代号 */
  m=s.match(/;\s*([^;()]+?)\s+Build\//i);
  if(m){
   code=m[1].replace(/^\s+|\s+$/g,"");
  }
-
- /* 一些浏览器会把型号写成括号里的内容 */
  if(code==="未知"){
   m=s.match(/Android[^;)]*;\s*([^;)]+?)(?:\s+Build\/|;|\))/i);
   if(m)code=m[1].replace(/^\s+|\s+$/g,"");
  }
 
- /* 品牌 */
  if(/Redmi/i.test(s))brand="Redmi";
  else if(/Xiaomi|MIUI|MiuiBrowser/i.test(s))brand="Xiaomi";
  else if(/HUAWEI|Huawei/i.test(s))brand="Huawei";
@@ -245,12 +255,10 @@ function androidInfo(s){
  else if(/TECNO/i.test(s))brand="TECNO";
  else if(/Infinix/i.test(s))brand="Infinix";
 
- /* 常见机型代码数据库 */
  var map={
   "M2010J19SC":"Redmi Note 9 4G",
   "M2010J19SI":"Redmi Note 9 4G",
   "M2010J19SG":"Redmi Note 9 4G",
-  "M2010J19SI":"Redmi Note 9 4G",
   "M2007J22G":"Redmi Note 9 4G",
   "M2007J22C":"Redmi Note 9 4G",
   "M2007J22I":"Redmi Note 9 4G",
@@ -288,21 +296,12 @@ function androidInfo(s){
  };
 
  var mapped=map[code];
-
- /* Samsung 型号有时只出现在 UA 中 */
  if(!mapped){
   var sm=s.match(/\bSM-[A-Z0-9-]+\b/i);
   if(sm)mapped=map[sm[0].toUpperCase()];
  }
-
  model=mapped||code;
-
- return {
-  brand:brand,
-  model:model,
-  code:code,
-  build:build
- };
+ return {brand:brand,model:model,code:code,build:build};
 }
 function appleDeviceInfo(s){
  var m=s.match(/Device\/Apple\(([^)]+)\)/i);
@@ -316,14 +315,6 @@ function identify(ipad,iphone,ver,safari){
  var osMajor=majorVersion(ver);
  var browserMajor=majorVersion(safari);
  var r={model:"无法确定",confidence:"低",reason:"特征不足",key:null};
-
- /*
-  * 重要：
-  * iOS Safari 的 screen.width/height 是 CSS 屏幕尺寸，
-  * physical width = CSS width × DPR。
-  * 因此这里同时使用 CSS 尺寸、DPR、iOS 主版本、
-  * Safari 主版本进行推断。
-  */
 
  if(ipad){
   if(w===768&&h===1024){
@@ -414,16 +405,12 @@ function enhanceAndroidFromUAData(){
    var pv=x.platformVersion||"";
    var us=ua();
    var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(us);
-
-   /* Chrome UA Reduction: Android x; K 中的版本可能是旧/冻结值，
-      platformVersion 是更可靠的实际 Android 版本。 */
    if(reduced&&pv){
     setText("version", "Android "+pv);
     setText("androidVersion", pv);
     setText("androidVersionSource","User-Agent Client Hints platformVersion");
     if(lastResult)lastResult.version=pv;
    }
-
    if(model){
     setText("androidModel",model);
     setText("model",model);
@@ -433,6 +420,7 @@ function enhanceAndroidFromUAData(){
   },function(){});
  }catch(e){}
 }
+
 function detect(){
  var s=ua(),p=navigator.platform||"",isIPad=/iPad/i.test(s)||(p==="MacIntel"&&(navigator.maxTouchPoints||0)>1);
  var isIPhone=/iPhone/i.test(s),isIPod=/iPod/i.test(s),isAndroid=/Android/i.test(s);
@@ -455,26 +443,30 @@ function detect(){
  var appleDevice=appleDeviceInfo(s);
  var id=identify(isIPad,isIPhone,ver,safari);
  if((isIPad||isIPhone)&&appleDevice){id.model=appleDevice;id.confidence="较高";id.reason="Apple Device 标识："+appleDevice;}
+ 
  if(isAndroid){
- var ai=androidInfo(s),am=androidVersion(s);
- var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(s);
- var hasRealModel=(ai.model!=="未知" && ai.code!=="未知");
- id.model=hasRealModel?ai.model:"Android 设备";
- id.confidence=hasRealModel&&am!=="未知"?"较高":(am!=="未知"?"中":"低");
- id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(hasRealModel?" + 型号代码 "+ai.code:(reduced?" + UA 已精简，硬件型号被隐藏":" + 未提供硬件型号"));
- var ab=document.getElementById("androidDatabase");
- if(ab)ab.style.display="block";
- setText("androidBrand",ai.brand);
- setText("androidModel",hasRealModel?ai.model:"无法从当前 UA 确定");
- setText("androidVersion",am);
- setText("androidBrowser",browserName(s));
- setText("androidBuild",ai.build+(ai.code!=="未知"?" / 型号代码 "+ai.code:""));
- setText("androidCapability",hasRealModel?"已提供真实型号代码":(reduced?"浏览器已精简 UA，型号不可见":"当前 UA 未提供型号代码"));
- setText("androidVersionSource",reduced?"User-Agent：Android "+am+"（Chrome UA Reduction）":"User-Agent：Android "+am);
-}}else{
- var ab2=document.getElementById("androidDatabase");
- if(ab2)ab2.style.display="none";
-}
+  var ai=androidInfo(s),am=androidVersion(s);
+  var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(s);
+  var hasRealModel=(ai.model!=="未知" && ai.code!=="未知");
+  id.model=hasRealModel?ai.model:"Android 设备";
+  id.confidence=hasRealModel&&am!=="未知"?"较高":(am!=="未知"?"中":"低");
+  id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(hasRealModel?" + 型号代码 "+ai.code:(reduced?" + UA 已精简，硬件型号被隐藏":" + 未提供硬件型号"));
+  var ab=document.getElementById("androidDatabase");
+  if(ab)ab.style.display="block";
+  setText("androidBrand",ai.brand);
+  setText("androidModel",hasRealModel?ai.model:"无法从当前 UA 确定");
+  setText("androidVersion",am);
+  setText("androidBrowser",browserName(s));
+  setText("androidBuild",ai.build+(ai.code!=="未知"?" / 型号代码 "+ai.code:""));
+  setText("androidCapability",hasRealModel?"已提供真实型号代码":(reduced?"浏览器已精简 UA，型号不可见":"当前 UA 未提供型号代码"));
+  
+  // 修复 4：修复了原来这里多出来的一个大括号导致语法崩溃的问题
+  setText("androidVersionSource",reduced?"User-Agent：Android "+am+"（Chrome UA Reduction）":"User-Agent：Android "+am);
+ } else {
+  var ab2=document.getElementById("androidDatabase");
+  if(ab2)ab2.style.display="none";
+ }
+ 
  setText("model",id.model);setText("confidence",id.confidence);setText("reason",id.reason);
  var ce=document.getElementById("confidence");if(ce){ce.className="value "+(id.confidence==="较高"?"high":id.confidence==="中"?"medium":"low");}
  if(id.key)showDB(id.key);else hideDB();
