@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>设备检测</title>
+<title>设备检测 V5.9</title>
 <style>
 html,body{margin:0;padding:0;background:#f2f2f7;color:#1c1c1e;font-family:Arial,"Helvetica Neue",sans-serif}
 body{min-width:280px}
@@ -75,7 +75,7 @@ body{min-width:280px}
 </head>
 <body>
 <div class="container">
-<div class="header"><h1>设备检测</h1><p>Device Detector V5.8</p></div>
+<div class="header"><h1>设备检测</h1><p>Device Detector V5.9</p></div>
 
 <div class="hero">
 <div class="icon" id="icon">📱</div>
@@ -158,31 +158,6 @@ body{min-width:280px}
 
 var lastResult=null;
 
-// 修复 1：补充缺失的 Apple 设备数据库字典
-var db = {
- "ipad2": ["iPad 2", "A5", "512MB", "9.7英寸", "2011", "iOS 4.3", "iOS 9.3.6"],
- "iphone4": ["iPhone 4", "A4", "512MB", "3.5英寸", "2010", "iOS 4.0", "iOS 7.1.2"],
- "iphone4s": ["iPhone 4S", "A5", "512MB", "3.5英寸", "2011", "iOS 5.0", "iOS 9.3.6"],
- "iphone5": ["iPhone 5", "A6", "1GB", "4.0英寸", "2012", "iOS 6.0", "iOS 10.3.4"],
- "iphone5s": ["iPhone 5s", "A7", "1GB", "4.0英寸", "2013", "iOS 7.0", "iOS 12.5.5"],
- "iphone6": ["iPhone 6", "A8", "1GB", "4.7英寸", "2014", "iOS 8.0", "iOS 12.5.5"],
- "iphone6plus": ["iPhone 6 Plus", "A8", "1GB", "5.5英寸", "2014", "iOS 8.0", "iOS 12.5.5"],
- "iphone6s": ["iPhone 6s", "A9", "2GB", "4.7英寸", "2015", "iOS 9.0", "iOS 15"],
- "iphone6splus": ["iPhone 6s Plus", "A9", "2GB", "5.5英寸", "2015", "iOS 9.0", "iOS 15"]
-};
-
-// 修复 2：补充获取 Safari 版本的函数
-function safariVersion(s){
- var m = s.match(/Version\/([0-9.]+)/i);
- return m ? m[1] : "未知";
-}
-
-// 修复 3：补充获取主版本号的函数
-function majorVersion(v){
- if (!v || v === "未知") return 0;
- return parseInt(v.split('.')[0], 10) || 0;
-}
-
 function setText(id,value){
  var e=document.getElementById(id);
  if(!e)return;
@@ -199,18 +174,41 @@ function iosVersion(s){
 function androidVersion(s){
  var m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
  if(m)return m[1];
+ /* 少数 WebView/厂商 UA */
  m=s.match(/\bAndroid\s*([0-9]+)\b/i);
  if(m)return m[1];
  return "未知";
 }
+
+var db={
+ipad2:["iPad 2","Apple A5","512 MB","9.7 英寸，1024 × 768","2011","iOS 4.3","iOS 9.3.6"],
+ipad3:["iPad（第 3 代）","Apple A5X","1 GB","9.7 英寸 Retina，2048 × 1536","2012","iOS 5.1","iOS 9.3.6"],
+ipad4:["iPad（第 4 代）","Apple A6X","1 GB","9.7 英寸 Retina，2048 × 1536","2012","iOS 6.0","iOS 10.3.4"],
+ipadmini:["iPad mini（第 1 代）","Apple A5","512 MB","7.9 英寸，1024 × 768","2012","iOS 6.0","iOS 9.3.6"],
+iphone4:["iPhone 4","Apple A4","512 MB","3.5 英寸，960 × 640","2010","iOS 4","iOS 7.1.2"],
+iphone4s:["iPhone 4S","Apple A5","512 MB","3.5 英寸，960 × 640","2011","iOS 5","iOS 9.3.6"],
+iphone5:["iPhone 5","Apple A6","1 GB","4 英寸，1136 × 640","2012","iOS 6","iOS 10.3.4"],
+iphone5s:["iPhone 5s","Apple A7","1 GB","4 英寸，1136 × 640","2013","iOS 7","iOS 12.5.x"],
+iphone6:["iPhone 6","Apple A8","1 GB","4.7 英寸，1334 × 750","2014","iOS 8","iOS 12.5.x"],
+iphone6s:["iPhone 6s","Apple A9","2 GB","4.7 英寸，1334 × 750","2015","iOS 9","iOS 15.8.x"],
+iphone6plus:["iPhone 6 Plus","Apple A8","1 GB","5.5 英寸，1920 × 1080","2014","iOS 8","iOS 12.5.x"],
+iphone6splus:["iPhone 6s Plus","Apple A9","2 GB","5.5 英寸，1920 × 1080","2015","iOS 9","iOS 15.8.x"]
+};
+
+function safariVersion(s){
+ var m=s.match(/Version\/([0-9.]+)/i);
+ return m?m[1]:"未知";
+}
+function majorVersion(v){
+ if(!v||v==="未知")return 0;
+ var n=parseInt(v.split(".")[0],10);
+ return isNaN(n)?0:n;
+}
 function browserName(s){
  var m;
- m=s.match(/MicroMessenger\/([0-9.]+)/i);
- if(m)return"微信 "+m[1]+"（内置 WebView）";
- m=s.match(/\bQQ\/([0-9.]+)/i);
- if(m)return"QQ "+m[1]+"（内置 WebView）";
- m=s.match(/QQBrowser\/([0-9.]+)/i);
- if(m)return"QQ浏览器 "+m[1];
+ m=s.match(/MicroMessenger\/([0-9.]+)/i);if(m)return"微信 "+m[1]+"（内置 WebView）";
+ m=s.match(/\bQQ\/([0-9.]+)/i);if(m)return"QQ "+m[1]+"（内置 WebView）";
+ m=s.match(/QQBrowser\/([0-9.]+)/i);if(m)return"QQ浏览器 "+m[1];
  m=s.match(/CriOS\/([0-9.]+)/i);if(m)return"Chrome "+m[1];
  m=s.match(/FxiOS\/([0-9.]+)/i);if(m)return"Firefox "+m[1];
  m=s.match(/EdgiOS\/([0-9.]+)/i);if(m)return"Edge "+m[1];
@@ -218,25 +216,18 @@ function browserName(s){
  m=s.match(/Firefox\/([0-9.]+)/i);if(m)return"Firefox "+m[1];
  m=s.match(/Edg\/([0-9.]+)/i);if(m)return"Edge "+m[1];
  m=s.match(/Version\/([0-9.]+).*Safari/i);if(m)return"Safari "+m[1];
- if(/WKWebView/i.test(s)||(/AppleWebKit\/[0-9.]+/i.test(s)&&/Mobile\/[0-9A-Z]+/i.test(s)&&!/Safari/i.test(s)))
-  return"WKWebView";
+ if(/WKWebView/i.test(s)||(/AppleWebKit\/[0-9.]+/i.test(s)&&/Mobile\/[0-9A-Z]+/i.test(s)&&!/Safari/i.test(s)))return"WKWebView";
  return"未知浏览器";
 }
 function androidInfo(s){
- var brand="未知",model="未知",build="未知",code="未知";
- var m;
- m=s.match(/Android[ \/]([0-9]+(?:\.[0-9]+){0,2})/i);
- m=s.match(/\bBuild\/([A-Za-z0-9._-]+)/i);
- if(m)build=m[1];
- m=s.match(/;\s*([^;()]+?)\s+Build\//i);
- if(m){
-  code=m[1].replace(/^\s+|\s+$/g,"");
- }
+ var brand="未知",model="未知",build="未知",code="未知",m;
+ m=s.match(/\bBuild\/([A-Za-z0-9._-]+)/i);if(m)build=m[1];
+ m=s.match(/Android[^;)]*;\s*([^;()]+?)\s+Build\//i);
+ if(m)code=m[1].replace(/^\s+|\s+$/g,"");
  if(code==="未知"){
-  m=s.match(/Android[^;)]*;\s*([^;)]+?)(?:\s+Build\/|;|\))/i);
+  m=s.match(/Android[^;)]*;\s*([^;)]+?)(?:;|\))/i);
   if(m)code=m[1].replace(/^\s+|\s+$/g,"");
  }
-
  if(/Redmi/i.test(s))brand="Redmi";
  else if(/Xiaomi|MIUI|MiuiBrowser/i.test(s))brand="Xiaomi";
  else if(/HUAWEI|Huawei/i.test(s))brand="Huawei";
@@ -252,60 +243,17 @@ function androidInfo(s){
  else if(/ASUS/i.test(s))brand="ASUS";
  else if(/Nokia/i.test(s))brand="Nokia";
  else if(/Sony/i.test(s))brand="Sony";
- else if(/TECNO/i.test(s))brand="TECNO";
- else if(/Infinix/i.test(s))brand="Infinix";
 
  var map={
-  "M2010J19SC":"Redmi Note 9 4G",
-  "M2010J19SI":"Redmi Note 9 4G",
-  "M2010J19SG":"Redmi Note 9 4G",
-  "M2007J22G":"Redmi Note 9 4G",
-  "M2007J22C":"Redmi Note 9 4G",
-  "M2007J22I":"Redmi Note 9 4G",
-  "M2007J20CG":"Redmi Note 9 Pro",
-  "M2007J3SG":"Xiaomi Mi 10T Pro",
-  "M2007J3SY":"Xiaomi Mi 10T Pro",
-  "M2101K7AG":"Redmi Note 10",
-  "M2101K7BG":"Redmi Note 10",
-  "M2101K6G":"Redmi Note 10 Pro",
-  "M2101K6I":"Redmi Note 10 Pro",
-  "2201116SG":"Redmi Note 11",
-  "2201117TG":"Redmi Note 11",
-  "2201117TY":"Redmi Note 11",
-  "2201117SI":"Redmi Note 11",
-  "2201116PG":"Redmi Note 11 Pro 5G",
-  "2201116SR":"Redmi Note 11 Pro 5G",
-  "2201117SG":"Redmi Note 11S",
-  "22041219PG":"Redmi Note 11 Pro+ 5G",
-  "22041219NY":"Redmi Note 11 Pro+ 5G",
-  "2201117TL":"Redmi Note 11 Pro 5G",
-  "SM-G991B":"Samsung Galaxy S21",
-  "SM-G991U":"Samsung Galaxy S21",
-  "SM-G996B":"Samsung Galaxy S21+",
-  "SM-G998B":"Samsung Galaxy S21 Ultra",
-  "SM-G973F":"Samsung Galaxy S10",
-  "SM-G975F":"Samsung Galaxy S10+",
-  "SM-G980F":"Samsung Galaxy S20",
-  "SM-G981B":"Samsung Galaxy S20 5G",
-  "SM-G986B":"Samsung Galaxy S20+ 5G",
-  "SM-G988B":"Samsung Galaxy S20 Ultra",
-  "Pixel 6":"Google Pixel 6",
-  "Pixel 6 Pro":"Google Pixel 6 Pro",
-  "Pixel 7":"Google Pixel 7",
-  "Pixel 7 Pro":"Google Pixel 7 Pro"
+ "M2010J19SC":"Redmi Note 9 4G","M2010J19SI":"Redmi Note 9 4G","M2007J22G":"Redmi Note 9 4G",
+ "M2007J22C":"Redmi Note 9 4G","M2007J20CG":"Redmi Note 9 Pro","M2101K7AG":"Redmi Note 10",
+ "M2101K6G":"Redmi Note 10 Pro","SM-G991B":"Samsung Galaxy S21","SM-G996B":"Samsung Galaxy S21+",
+ "SM-G998B":"Samsung Galaxy S21 Ultra","SM-G973F":"Samsung Galaxy S10","SM-G975F":"Samsung Galaxy S10+",
+ "SM-G980F":"Samsung Galaxy S20","SM-G981B":"Samsung Galaxy S20 5G","SM-G986B":"Samsung Galaxy S20+ 5G",
+ "SM-G988B":"Samsung Galaxy S20 Ultra"
  };
-
- var mapped=map[code];
- if(!mapped){
-  var sm=s.match(/\bSM-[A-Z0-9-]+\b/i);
-  if(sm)mapped=map[sm[0].toUpperCase()];
- }
- model=mapped||code;
- return {brand:brand,model:model,code:code,build:build};
-}
-function appleDeviceInfo(s){
- var m=s.match(/Device\/Apple\(([^)]+)\)/i);
- return m?m[1]:"";
+ model=map[code]||code;
+ return{brand:brand,model:model,code:code,build:build};
 }
 
 function identify(ipad,iphone,ver,safari){
@@ -313,33 +261,15 @@ function identify(ipad,iphone,ver,safari){
  var h=Math.max(screen.width,screen.height);
  var d=window.devicePixelRatio||1;
  var osMajor=majorVersion(ver);
- var browserMajor=majorVersion(safari);
  var r={model:"无法确定",confidence:"低",reason:"特征不足",key:null};
 
  if(ipad){
   if(w===768&&h===1024){
    if(d<=1.1){
-    if(osMajor>=4&&osMajor<=9){
-     if(osMajor<=5){
-      r.model="iPad 2";r.confidence="较高";r.reason="1024 × 768 CSS + DPR 1 + iOS "+ver+" + Safari "+safari;r.key="ipad2";
-     }else{
-      r.model="iPad 2 / iPad mini";r.confidence="中";r.reason="1024 × 768 CSS + DPR 1 + iOS "+ver+" + Safari "+safari;
-     }
-    }else{
-     r.model="iPad 2 / iPad mini";r.confidence="中";r.reason="1024 × 768 CSS + DPR 1";
-    }
+     r.model="iPad（非 Retina）";r.confidence="中";r.reason="1024 × 768 CSS + DPR 1";
    }else{
-    if(osMajor>=5&&osMajor<=10){
-     r.model="iPad 3 / iPad 4";r.confidence="中";r.reason="1024 × 768 CSS + Retina DPR + iOS "+ver+" + Safari "+safari;
-    }else{
      r.model="9.7 英寸 Retina iPad";r.confidence="中";r.reason="1024 × 768 CSS + Retina DPR";
-    }
    }
-  }else if(w===768&&h===1004){
-   r.model="iPad（非全屏网页视口）";r.confidence="低";r.reason="检测到浏览器可视区域而非完整屏幕尺寸";
-  }else if(w===768&&h===1024&&d===1){
-   r.model="iPad 2";r.confidence="较高";r.reason="1024 × 768 CSS + DPR 1";
-   r.key="ipad2";
   }else if(w===810&&h===1080){
    r.model="10.2 英寸 iPad";r.confidence="较高";r.reason="810 × 1080 CSS + iPadOS";
   }else if(w===834&&h===1112){
@@ -349,44 +279,31 @@ function identify(ipad,iphone,ver,safari){
   }else if(w===1024&&h===1366){
    r.model="12.9 英寸 iPad Pro";r.confidence="较高";r.reason="1024 × 1366 CSS + iPadOS";
   }else{
-   r.model="iPad";r.confidence="中";r.reason=w+" × "+h+" CSS + DPR "+d+" + iOS "+ver+" + Safari "+safari;
+   r.model="iPad";r.confidence="中";r.reason=w+" × "+h+" CSS + DPR "+d;
   }
  }else if(iphone){
   if(w===320&&h===480){
-   if(osMajor>=5&&osMajor<=9){
-    r.model="iPhone 4 / 4S";r.confidence="中";r.reason="320 × 480 CSS + iOS "+ver+" + Safari "+safari;
-    if(osMajor<=4)r.key="iphone4";
-    else if(osMajor===5)r.key="iphone4s";
-   }else{
-    r.model="iPhone 4 / 4S";r.confidence="中";r.reason="320 × 480 CSS + DPR "+d;
-   }
+   r.model="iPhone 4 / 4S";r.confidence="中";r.reason="320 × 480 CSS + DPR "+d;
   }else if(w===320&&h===568){
-   if(osMajor>=7&&osMajor<=12){
-    r.model="iPhone 5 / 5c / 5s";r.confidence="中";r.reason="320 × 568 CSS + iOS "+ver+" + Safari "+safari;
-    if(osMajor===6)r.key="iphone5";
-    if(osMajor>=7)r.key="iphone5s";
-   }else{
-    r.model="4 英寸 iPhone";r.confidence="中";r.reason="320 × 568 CSS + DPR "+d;
-   }
+   r.model="4 英寸 iPhone";r.confidence="中";r.reason="320 × 568 CSS + DPR "+d;
   }else if(w===375&&h===667){
-   if(osMajor>=9){
-    r.model="iPhone 6 / 6s";r.confidence="中";r.reason="375 × 667 CSS + iOS "+ver+" + Safari "+safari;
-    if(osMajor>=9)r.key="iphone6s";
-   }else{
-    r.model="iPhone 6";r.confidence="中";r.reason="375 × 667 CSS";r.key="iphone6";
-   }
+   r.model="4.7 英寸 iPhone";r.confidence="中";r.reason="375 × 667 CSS";
   }else if(w===414&&h===736){
-   r.model="iPhone 6 Plus / 6s Plus";r.confidence="中";r.reason="414 × 736 CSS + iOS "+ver+" + Safari "+safari;
-   if(osMajor>=9)r.key="iphone6splus";else r.key="iphone6plus";
+   r.model="5.5 英寸 iPhone";r.confidence="中";r.reason="414 × 736 CSS";
   }else if(w===375&&h===812){
-   r.model="全面屏 iPhone（375 × 812）";r.confidence="较高";r.reason="375 × 812 CSS + iOS "+ver+" + Safari "+safari;
+   r.model="全面屏 iPhone（5.8 / 5.4 英寸）";r.confidence="较高";r.reason="375 × 812 CSS";
   }else if(w===414&&h===896){
-   r.model="6.1 英寸全面屏 iPhone";r.confidence="较高";r.reason="414 × 896 CSS + iOS "+ver+" + Safari "+safari;
+   r.model="全面屏 iPhone（6.1 / 6.5 英寸）";r.confidence="较高";r.reason="414 × 896 CSS";
   }else{
-   r.model="iPhone";r.confidence="中";r.reason=w+" × "+h+" CSS + DPR "+d+" + iOS "+ver+" + Safari "+safari;
+   r.model="iPhone";r.confidence="中";r.reason=w+" × "+h+" CSS + DPR "+d;
   }
  }
  return r;
+}
+
+function appleDeviceInfo(s){
+ var m=s.match(/Device\/Apple\(([^)]+)\)/i);
+ return m?m[1]:"";
 }
 function showDB(key){
  var a=db[key],box=document.getElementById("appleDatabase");
@@ -401,21 +318,18 @@ function enhanceAndroidFromUAData(){
  if(!navigator.userAgentData||!navigator.userAgentData.getHighEntropyValues)return;
  try{
   navigator.userAgentData.getHighEntropyValues(["model","platformVersion"]).then(function(x){
-   var model=x.model||"";
-   var pv=x.platformVersion||"";
-   var us=ua();
-   var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(us);
-   if(reduced&&pv){
-    setText("version", "Android "+pv);
-    setText("androidVersion", pv);
-    setText("androidVersionSource","User-Agent Client Hints platformVersion");
-    if(lastResult)lastResult.version=pv;
+   var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(ua());
+   if(reduced&&x.platformVersion){
+    setText("version",x.platformVersion);
+    setText("androidVersion",x.platformVersion);
+    if(document.getElementById("androidVersionSource"))setText("androidVersionSource","UA-CH platformVersion（Chrome 精简 UA）");
+    if(lastResult)lastResult.version=x.platformVersion;
    }
-   if(model){
-    setText("androidModel",model);
-    setText("model",model);
+   if(x.model){
+    setText("androidModel",x.model);
+    setText("model",x.model);
     setText("confidence","较高");
-    if(lastResult)lastResult.model=model;
+    if(lastResult)lastResult.model=x.model;
    }
   },function(){});
  }catch(e){}
@@ -433,40 +347,36 @@ function detect(){
  else if(/Mac OS X/i.test(s)){os="macOS";device="Mac";type="电脑";icon="";}
  else if(/Linux/i.test(s)){os="Linux";device="Linux PC";type="电脑";icon="Linux";}
 
- if(isRobot){var iconBox=document.getElementById("icon");if(iconBox){iconBox.innerHTML="🤖️";iconBox.style.fontFamily="Arial, Helvetica, sans-serif";iconBox.style.fontSize="68px";}}
+ if(isRobot){var iconBox=document.getElementById("icon");if(iconBox){iconBox.innerHTML="🤖️";}}
  else{setText("icon",icon);}
  if(icon===""){var ie=document.getElementById("icon");if(ie){ie.style.fontFamily="Arial, Helvetica, sans-serif";ie.style.fontSize="72px";ie.style.lineHeight="80px";}}
  setText("system",os);setText("device",device);setText("badge","✓ 检测完成");
  setText("os",os);setText("version",ver);setText("type",type);setText("browser",browserName(s));
 
  var safari= safariVersion(s);
- var appleDevice=appleDeviceInfo(s);
  var id=identify(isIPad,isIPhone,ver,safari);
+ var appleDevice=appleDeviceInfo(s);
  if((isIPad||isIPhone)&&appleDevice){id.model=appleDevice;id.confidence="较高";id.reason="Apple Device 标识："+appleDevice;}
- 
  if(isAndroid){
-  var ai=androidInfo(s),am=androidVersion(s);
-  var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(s);
-  var hasRealModel=(ai.model!=="未知" && ai.code!=="未知");
-  id.model=hasRealModel?ai.model:"Android 设备";
-  id.confidence=hasRealModel&&am!=="未知"?"较高":(am!=="未知"?"中":"低");
-  id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(hasRealModel?" + 型号代码 "+ai.code:(reduced?" + UA 已精简，硬件型号被隐藏":" + 未提供硬件型号"));
-  var ab=document.getElementById("androidDatabase");
-  if(ab)ab.style.display="block";
-  setText("androidBrand",ai.brand);
-  setText("androidModel",hasRealModel?ai.model:"无法从当前 UA 确定");
-  setText("androidVersion",am);
-  setText("androidBrowser",browserName(s));
-  setText("androidBuild",ai.build+(ai.code!=="未知"?" / 型号代码 "+ai.code:""));
-  setText("androidCapability",hasRealModel?"已提供真实型号代码":(reduced?"浏览器已精简 UA，型号不可见":"当前 UA 未提供型号代码"));
-  
-  // 修复 4：修复了原来这里多出来的一个大括号导致语法崩溃的问题
-  setText("androidVersionSource",reduced?"User-Agent：Android "+am+"（Chrome UA Reduction）":"User-Agent：Android "+am);
- } else {
-  var ab2=document.getElementById("androidDatabase");
-  if(ab2)ab2.style.display="none";
- }
- 
+ var ai=androidInfo(s),am=androidVersion(s);
+ var reduced=/Android\s+[0-9]+;\s*K(?:[;)]|$)/i.test(s);
+ var hasRealModel=(ai.model!=="未知" && ai.code!=="未知");
+ id.model=hasRealModel?ai.model:"Android 设备";
+ id.confidence=hasRealModel&&am!=="未知"?"较高":(am!=="未知"?"中":"低");
+ id.reason="Android "+am+" + "+browserName(s)+(ai.brand!=="未知"?" + 品牌 "+ai.brand:"")+(hasRealModel?" + 型号代码 "+ai.code:(reduced?" + UA 已精简，硬件型号被隐藏":" + 未提供硬件型号"));
+ var ab=document.getElementById("androidDatabase");
+ if(ab)ab.style.display="block";
+ setText("androidBrand",ai.brand);
+ setText("androidModel",hasRealModel?ai.model:"无法从当前 UA 确定");
+ setText("androidVersion",am);
+ setText("androidBrowser",browserName(s));
+ setText("androidBuild",ai.build+(ai.code!=="未知"?" / 型号代码 "+ai.code:""));
+ setText("androidCapability",hasRealModel?"已提供真实型号代码":(reduced?"浏览器已精简 UA，型号不可见":"当前 UA 未提供型号代码"));
+ if(document.getElementById("androidVersionSource"))setText("androidVersionSource",reduced?"User-Agent：Android "+am+"（等待 UA-CH 校正）":"User-Agent：Android "+am);
+}else{
+ var ab2=document.getElementById("androidDatabase");
+ if(ab2)ab2.style.display="none";
+}
  setText("model",id.model);setText("confidence",id.confidence);setText("reason",id.reason);
  var ce=document.getElementById("confidence");if(ce){ce.className="value "+(id.confidence==="较高"?"high":id.confidence==="中"?"medium":"low");}
  if(id.key)showDB(id.key);else hideDB();
@@ -489,7 +399,7 @@ function detect(){
 function share(){
  var r=lastResult;
  if(!r){alert("检测尚未完成。");return;}
- var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.8";
+ var t=" 设备检测\n\n设备："+r.device+"\n系统："+r.os+" "+r.version+"\n型号："+r.model+"\n可信度："+r.confidence+"\n屏幕："+r.resolution+"\nDPR："+r.dpr+"\n浏览器："+r.browser+"\n\nDevice Detector V5.9";
  if(navigator.share){navigator.share({title:"设备检测",text:t});return;}
  var ta=document.createElement("textarea");ta.value=t;ta.style.position="absolute";ta.style.left="-9999px";
  document.body.appendChild(ta);ta.focus();ta.select();
